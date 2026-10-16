@@ -45,6 +45,22 @@ ORDER BY exposure DESC
 LIMIT $limit
 """
 
+# Plants that bridge the most drug supply chains: betweenness centrality on the plant-drug projection.
+BRIDGES = """
+CALL algo.betweenness({nodeLabels: ['Facility', 'Ingredient'], relationshipTypes: ['SUPPLIES', 'DEPENDS_ON'],
+                       samplingSize: $nodes, samplingSeed: 7})
+YIELD node, score
+WHERE node:Facility AND score > 0
+WITH node AS f, score ORDER BY score DESC LIMIT $limit
+OPTIONAL MATCH (f)-[:SUPPLIES]->(i:Ingredient)
+OPTIONAL MATCH (f)-[:FLAGGED]->(a:Action)
+WITH f, score, collect(DISTINCT i.name) AS drugs, collect(DISTINCT a.date) AS import_alert_dates
+OPTIONAL MATCH (f)-[:SUPPLIES]->(:Ingredient)-[:IN_CLASS]->(c:Class)
+RETURN f.name AS plant, f.fei AS fei, f.country AS country, round(score) AS betweenness,
+       size(drugs) AS drugs_made, count(DISTINCT c) AS classes, drugs[0..6] AS sample, import_alert_dates
+ORDER BY betweenness DESC
+"""
+
 # Same class, no plant shared with the original, no flagged plant, not itself short.
 SAFE = """
 MATCH (i:Ingredient {name: $drug})-[:IN_CLASS]->(:Class)<-[:IN_CLASS]-(alt:Ingredient)
@@ -91,6 +107,12 @@ def chokepoints(limit: int = 15) -> list[dict]:
 
 def drug_plants(drug: str) -> list[dict]:
     return run(DRUG_PLANTS, drug=drug.upper())
+
+
+def bridges(limit: int = 15) -> list[dict]:
+    # algo.betweenness samples 32 source nodes by default; sampling every node gives the exact score.
+    nodes = run("MATCH (n) WHERE n:Facility OR n:Ingredient RETURN count(n) AS n")[0]["n"]
+    return run(BRIDGES, limit=limit, nodes=nodes)
 
 
 def safe(drug: str) -> list[dict]:

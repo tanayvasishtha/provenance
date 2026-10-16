@@ -112,4 +112,27 @@ async function renderPlantAlerts(fei) {
   }
 }
 
+/* Risk view, second table: betweenness centrality from FalkorDB's algo.betweenness. */
+async function loadBridges() {
+  const state = $("#bridge-state");
+  try {
+    const res = await api("/api/bridges?limit=15");
+    const tbody = $("#bridge-table tbody");
+    tbody.innerHTML = "";
+    res.rows.forEach((r) => {
+      const tr = el("tr");
+      const plant = el("td", {}, `${r.plant} `);
+      plant.append(el("span", { class: "code" }, `FEI ${r.fei}`));
+      tr.append(el("td", { class: "num" }, String(r.betweenness)), plant, el("td", {}, r.country),
+        el("td", { class: "num" }, `${r.drugs_made} / ${r.classes}`), el("td", {}, r.sample.map(title).join(", ")));
+      tbody.append(tr);
+    });
+    $("#bridge-cypher").textContent = res.cypher;
+    setState(state, res.rows.length ? "" : "No plant bridges two drug supply chains in this graph.");
+    $("#bridge-table").hidden = !res.rows.length;
+  } catch (e) {
+    setState(state, `Could not run betweenness: ${e.message}`, true);
+  }
+}
+
 loadHospitals();

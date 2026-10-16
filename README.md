@@ -103,6 +103,15 @@ RETURN f.name AS plant, i.name AS ingredient, from_plant, all_products,
        round(100.0 * from_plant / all_products) AS share_pct, short_now
 ```
 
+Bridging plants: exact betweenness centrality (FalkorDB `algo.betweenness`) on a plant-drug projection, where `(Facility)-[:SUPPLIES]->(Ingredient)` and `(Ingredient)-[:DEPENDS_ON]->(Facility)` exist for every plant that makes a drug. A high score means many drug-to-drug supply paths run through the plant, so its failure spreads across drug classes. Fresenius Kabi (FEI 3001833549) makes 15 of the graph's drugs across 14 classes. Intas ranks 33rd: a single point of failure for platinum drugs, not a bridge between classes.
+
+```cypher
+CALL algo.betweenness({nodeLabels: ['Facility', 'Ingredient'], relationshipTypes: ['SUPPLIES', 'DEPENDS_ON'],
+                       samplingSize: $nodes, samplingSeed: 7})
+YIELD node, score
+WHERE node:Facility AND score > 0
+```
+
 Safe substitutes: same class, no shared manufacturing plant, ranked by whether they are short and whether a flagged plant makes them. The baseline uses FalkorDB's vector index:
 
 ```cypher
@@ -119,6 +128,7 @@ All queries live in [src/provenance/queries.py](src/provenance/queries.py); the 
 - Repackers looked like factories: labels list repackers and relabellers next to manufacturers. Counting them made the shared-plant rate 94%. Split into `MAKES` and `HANDLES`; the honest rate is 78%.
 - Two Intas sites, two dates: the first matcher attached both Intas import-alert entries (June and November 2023) to one plant. The November entry belongs to a different site (FEI 3003157498). The matcher now scores every registered site of the firm by shared address words and takes the best one. A test pins this.
 - DailyMed rate limits: the first full pull died on HTTP 429 at label 1,739. The fetcher now paces DailyMed to one request every 0.35 s, honours `Retry-After`, and records every response so a rerun resumes.
+- Betweenness was sampled: `algo.betweenness` starts from 32 sampled nodes by default, so its scores are estimates. Setting `samplingSize` to the node count (398) makes them exact. Even exact, FalkorDB 4.22 and 6.0.1 return different scores on the same 671 edges; both put the same three plants on top (APL Healthcare, Fresenius Kabi FEI 3001833549, West-Ward Columbus) in a different order. The live app runs on FalkorDB Cloud (4.22). A test checks the top three on both.
 - Combination products pulled in unrelated classes: dextrose combinations dragged heparin into scope. Scope now uses single-ingredient products only.
 
 ## Known gaps

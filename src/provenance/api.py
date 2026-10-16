@@ -115,6 +115,11 @@ def plants() -> dict:
     return {"flagged": flagged, "exposed": top}
 
 
+@app.get("/api/bridges")
+def bridges(limit: int = 15) -> dict:
+    return _answer(queries.BRIDGES, queries.bridges(limit))
+
+
 @app.get("/api/chokepoints")
 def chokepoints(limit: int = 15) -> dict:
     return _answer(queries.CHOKEPOINTS, queries.chokepoints(limit))

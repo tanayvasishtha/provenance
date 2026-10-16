@@ -58,6 +58,9 @@ TOOLS = [
           FEI, ["fei"]),
     _tool("riskiest_plants", "Plants ranked by how much of today's shortage drugs they carry.",
           {"limit": {"type": "integer", "description": "How many plants, 1 to 25."}}, ["limit"]),
+    _tool("bridge_plants", "Plants that bridge the most separate drug supply chains, by betweenness centrality "
+          "(FalkorDB algo.betweenness). A failure there spreads shortages across drug classes.",
+          {"limit": {"type": "integer", "description": "How many plants, 1 to 25."}}, ["limit"]),
     _tool("hospital_memory", "What this hospital stocks and every substitution it decided before, newest first.",
           HOSP, ["hospital"]),
     _tool("record_decision", "Store the pharmacist's chosen substitute in the hospital's own graph.",
@@ -83,6 +86,8 @@ def run_tool(name: str, args: dict) -> tuple[dict | list, str]:
         return queries.plant_down(args["fei"]), queries.PLANT_DOWN
     if name == "riskiest_plants":
         return queries.chokepoints(max(1, min(25, int(args["limit"])))), queries.CHOKEPOINTS
+    if name == "bridge_plants":
+        return queries.bridges(max(1, min(25, int(args["limit"])))), queries.BRIDGES
     if name == "hospital_memory":
         return memory.profile(args["hospital"]), "MATCH (:Hospital)-[:DECIDED]->(x:Decision) RETURN x  // in graph hospital:<slug>"
     if name == "record_decision":

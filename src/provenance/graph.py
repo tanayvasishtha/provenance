@@ -85,6 +85,11 @@ def load(snap: dict | None = None) -> dict:
             g.query(f"""UNWIND $rows AS r MATCH (f:Facility {{duns: r.duns}}), (p:Product {{ndc: r.ndc}})
                        MERGE (f)-[m:{rel}]->(p) SET m.ops = coalesce(m.ops, []) + r.op""", {"rows": b})
 
+    # Plant-to-drug projection in both directions, so shortest paths between drugs run through the plants that make
+    # them. algo.betweenness on it scores plants that bridge otherwise separate drug supply chains.
+    g.query("MATCH (f:Facility)-[:MAKES]->(:Product)-[:CONTAINS]->(i:Ingredient) WITH DISTINCT f, i "
+            "MERGE (f)-[:SUPPLIES]->(i) MERGE (i)-[:DEPENDS_ON]->(f)")
+
     shorts = []
     for s in snap["shortages"]:
         for n in s["product_ndcs"]:

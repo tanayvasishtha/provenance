@@ -58,3 +58,9 @@ def test_graph_only_agent_names_the_first_drug_and_cites_intas(monkeypatch):
     assert r["mode"] in {"graph-only", "replay"}
     assert "3004011473" in r["answer"]
     assert [t["tool"] for t in r["trace"]][:2] == ["plants_for_drug", "substitute_trap"]
+
+
+def test_betweenness_top_three_holds_on_both_engines():
+    # FalkorDB 4.22 and 6.0 give different exact scores on the same 671 edges, but the same top three plants.
+    top = {r["fei"] for r in queries.bridges(3)}
+    assert top == {"3011895410", "3001833549", "1510690"}

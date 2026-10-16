@@ -351,6 +351,7 @@ async function loadRisk() {
     setState(state, "");
     $("#risk-table").hidden = false;
     riskLoaded = true;
+    loadBridges();
   } catch (e) {
     setState(state, `Could not rank plants: ${e.message}`, true);
   }
