@@ -128,10 +128,49 @@ tr.short td:first-child { font-weight: 600; }
 .colophon { border-top: 1px solid var(--rule-strong); color: var(--ink-2); font-size: 0.9em; padding: var(--s4) 0 var(--s5); }
 .colophon p { max-width: 90ch; }
 
+/* Agent view: question and answer on the left, the hospital's memory graph on the right. */
+.ask-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--s5); }
+textarea {
+  display: block; width: 100%; font: inherit; padding: var(--s2) var(--s3); border-radius: 2px;
+  background: var(--sheet); color: var(--ink); border: 1px solid var(--rule-strong); resize: vertical;
+}
+#hospital { display: block; width: 100%; max-width: none; }
+.ask .second { margin-top: var(--s4); }
+.examples { color: var(--ink-2); font-size: 0.92em; margin: var(--s3) 0; }
+.example {
+  display: block; text-align: left; background: none; color: var(--ink); border: 0; padding: var(--s1) 0;
+  min-height: 32px; font-weight: 400; text-decoration: underline; text-underline-offset: 3px;
+}
+.example:hover { background: none; color: var(--ink-2); }
+.mode { font-size: 0.88em; color: var(--ink-2); margin: var(--s4) 0 var(--s2); }
+.mode .code { font-family: var(--mono); }
+.answer { padding: var(--s3) var(--s4); background: var(--sheet); border: 1px solid var(--rule); white-space: pre-wrap; }
+.trace { padding-left: var(--s4); }
+.trace li { margin: var(--s2) 0; }
+.trace .tool { font-family: var(--mono); font-weight: 500; }
+.trace .args { font-family: var(--mono); font-size: 0.88em; color: var(--ink-2); }
+.trace pre { margin: var(--s1) 0 0; padding: var(--s2) var(--s3); background: var(--sheet); border: 1px solid var(--rule); font: 12px/1.5 var(--mono); overflow-x: auto; }
+.memory { border-left: 1px solid var(--rule); padding-left: var(--s4); }
+.memory h2 { font-size: 1.1em; margin: 0; }
+.memory h3 { font-size: 0.95em; margin: var(--s4) 0 var(--s2); }
+.plain { margin: 0; padding: 0; list-style: none; }
+.plain li { padding: var(--s1) 0; border-top: 1px solid var(--rule); font-size: 0.94em; }
+.plain .when { font-family: var(--mono); font-size: 0.85em; color: var(--ink-2); display: block; }
+.quiet { background: none; color: var(--ink); border: 1px solid var(--rule-strong); margin-top: var(--s4); font-weight: 500; }
+.quiet:hover { background: var(--sheet); }
+.alerts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s3); }
+.alert-card { border: 1px solid var(--rule); background: var(--sheet); padding: var(--s3) var(--s4); }
+.alert-card.hit { border-color: var(--alert); }
+.alert-card h3 { font-size: 1em; margin: 0 0 var(--s2); }
+.alert-card p { margin: var(--s1) 0; font-size: 0.94em; }
+.alert-card .hitline { color: var(--alert); font-weight: 500; }
+
 /* Below 760px the comparison stacks; the graph answer comes first because it is the answer. */
 @media (max-width: 760px) {
   .compare { grid-template-columns: 1fr; gap: var(--s4); }
   .side-graph { order: -1; }
+  .ask-layout { grid-template-columns: 1fr; }
+  .memory { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: var(--s4); }
   .side-rag { border-right: 0; padding-right: 0; border-top: 1px solid var(--rule); padding-top: var(--s4); }
   .chain-fig figcaption { display: none; }
   .tabs { gap: var(--s4); }

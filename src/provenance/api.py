@@ -1,18 +1,27 @@
 """HTTP API and static page. Every graph answer carries the Cypher that produced it."""
 
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import queries
+from pydantic import BaseModel, Field
+
+from . import agent, memory, queries
 from .baseline import moiety, rag_substitutes
 from .config import settings
 from .eval import SHORT_DRUGS
 
 WEB = Path(__file__).resolve().parents[2] / "web"
-app = FastAPI(title="Provenance")
+@asynccontextmanager
+async def lifespan(_app):
+    memory.seed()  # demo hospital tenants; existing decisions are kept
+    yield
+
+
+app = FastAPI(title="Provenance", lifespan=lifespan)
 
 
 @app.middleware("http")
@@ -74,9 +83,54 @@ def plant(fei: str) -> dict:
     return _answer(queries.PLANT_DOWN, rows)
 
 
+@app.get("/api/plants")
+def plants() -> dict:
+    """Plants for the picker: every plant under an FDA import alert, then the most exposed ones."""
+    flagged = queries.run("MATCH (f:Facility)-[:FLAGGED]->(a:Action) RETURN f.name AS plant, f.fei AS fei, f.country AS country, "
+                          "collect(a.date) AS import_alert_dates ORDER BY plant")
+    top = [r for r in queries.chokepoints(60) if r["fei"] not in {f["fei"] for f in flagged}]
+    return {"flagged": flagged, "exposed": top}
+
+
 @app.get("/api/chokepoints")
 def chokepoints(limit: int = 15) -> dict:
     return _answer(queries.CHOKEPOINTS, queries.chokepoints(limit))
+
+
+class Ask(BaseModel):
+    question: str = Field(min_length=3, max_length=600)
+    hospital: str | None = None
+
+
+@app.post("/api/ask")
+def ask(body: Ask) -> dict:
+    if body.hospital and body.hospital not in memory.DEMO_HOSPITALS:
+        raise HTTPException(404, f"Unknown hospital {body.hospital}")
+    return agent.ask(body.question, body.hospital)
+
+
+@app.get("/api/hospitals")
+def hospitals() -> list[dict]:
+    return memory.hospitals()
+
+
+@app.get("/api/hospital/{slug}")
+def hospital(slug: str) -> dict:
+    try:
+        return memory.profile(slug)
+    except KeyError as e:
+        raise HTTPException(404, str(e)) from e
+
+
+@app.post("/api/hospital/{slug}/forget")
+def forget(slug: str) -> dict:
+    memory.forget(slug)
+    return memory.profile(slug)
+
+
+@app.get("/api/event/{fei}")
+def event(fei: str) -> dict:
+    return memory.plant_event(fei)
 
 
 if WEB.exists():

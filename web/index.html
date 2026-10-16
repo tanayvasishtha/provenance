@@ -20,6 +20,7 @@
   </div>
   <nav class="wrap tabs" aria-label="Views">
     <a href="#check" data-view="check" aria-current="page">Check a substitute</a>
+    <a href="#ask" data-view="ask">Ask the agent</a>
     <a href="#plant" data-view="plant">If a plant stops</a>
     <a href="#risk" data-view="risk">Where the risk sits</a>
   </nav>
@@ -73,6 +74,41 @@
     </div>
   </section>
 
+  <section id="view-ask" data-view-panel="ask" hidden>
+    <div class="ask-layout">
+      <div>
+        <form class="ask" id="ask-form">
+          <label for="hospital">Hospital</label>
+          <select id="hospital" name="hospital"></select>
+          <label for="question" class="second">Question</label>
+          <textarea id="question" name="question" rows="3" required minlength="3" maxlength="600" placeholder="Cisplatin is short. Is carboplatin a safe switch?"></textarea>
+          <p class="examples">Try:
+            <button type="button" class="example">Cisplatin is short. Is carboplatin a safe switch?</button>
+            <button type="button" class="example">We switched cisplatin to oxaliplatin because carboplatin shares the Intas plant.</button>
+            <button type="button" class="example">What do we stock that FEI 3004011473 makes?</button>
+          </p>
+          <button type="submit">Ask</button>
+        </form>
+        <div id="ask-state" class="state" role="status" aria-live="polite"></div>
+        <article id="ask-result" hidden>
+          <p class="mode" id="ask-mode"></p>
+          <div id="ask-answer" class="answer"></div>
+          <h3>What the agent ran</h3>
+          <ol id="ask-trace" class="trace"></ol>
+        </article>
+      </div>
+      <aside class="memory" aria-labelledby="memory-title">
+        <h2 id="memory-title">This hospital's memory</h2>
+        <p class="method">Its own FalkorDB graph. Other hospitals never see it.</p>
+        <h3>Stocks</h3>
+        <ul id="mem-stocks" class="plain"></ul>
+        <h3>Substitutions decided</h3>
+        <ol id="mem-decisions" class="plain"></ol>
+        <button type="button" id="forget" class="quiet">Clear this hospital's decisions</button>
+      </aside>
+    </div>
+  </section>
+
   <section id="view-plant" data-view-panel="plant" hidden>
     <form class="ask" id="plant-form">
       <label for="plant">Plant (FDA FEI number)</label>
@@ -90,6 +126,9 @@
         </table>
       </div>
       <p class="note">Share counts labels, not volume. FDA does not publish how much each plant ships.</p>
+      <h2 class="table-title">Which hospitals feel it</h2>
+      <p class="method">The same plant, read against each hospital's own memory graph: what it stocks, and the substitutes it already chose.</p>
+      <div id="plant-alerts" class="alerts"></div>
       <details class="cypher"><summary>Show the Cypher</summary><pre id="plant-cypher"></pre></details>
     </div>
   </section>
@@ -116,5 +155,6 @@
   </div>
 </footer>
 <script src="/static/app.js"></script>
+<script src="/static/agent.js"></script>
 </body>
 </html>

@@ -282,10 +282,9 @@ async function loadPlants() {
   if (plantsLoaded) return;
   const sel = $("#plant");
   try {
-    const { rows } = await api("/api/chokepoints?limit=60");
+    const { flagged, exposed } = await api("/api/plants");
     sel.innerHTML = "";
     sel.append(el("option", { value: "" }, "Choose a plant"));
-    const flagged = rows.filter((r) => r.import_alert_dates.length), rest = rows.filter((r) => !r.import_alert_dates.length);
     const group = (label, list) => {
       if (!list.length) return;
       const g = el("optgroup", { label });
@@ -293,7 +292,7 @@ async function loadPlants() {
       sel.append(g);
     };
     group("Under FDA import alert 66-40", flagged);
-    group("Most exposure to today's shortage drugs", rest);
+    group("Most exposure to today's shortage drugs", exposed);
     plantsLoaded = true;
   } catch (e) {
     setState($("#plant-state"), `Could not load plants: ${e.message}`, true);
@@ -321,6 +320,7 @@ $("#plant-form").addEventListener("submit", async (ev) => {
     $("#plant-cypher").textContent = res.cypher;
     setState(state, `${res.rows[0].plant}: ${res.rows.length} drug${res.rows.length > 1 ? "s" : ""} depend on it.`);
     $("#plant-result").hidden = false;
+    renderPlantAlerts(fei);
   } catch (e) {
     setState(state, `Could not trace this plant: ${e.message}`, true);
   }
