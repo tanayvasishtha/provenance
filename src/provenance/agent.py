@@ -174,7 +174,10 @@ _DRUG_NAMES: list[str] = []
 
 
 def warm() -> None:
+    """Read the drug list and open one pooled connection per parallel lookup, so no visitor pays for the handshakes."""
     _known_drugs()
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(lambda _: queries.run("RETURN 1 AS ok"), range(4)))
 
 
 def _known_drugs() -> list[str]:
