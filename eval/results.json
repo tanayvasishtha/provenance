@@ -1,0 +1,485 @@
+{
+ "summary": {
+  "drugs_in_shortage_evaluated": 18,
+  "rag_sub_shares_a_plant": 14,
+  "rag_sub_shares_flagged_plant": 1,
+  "rag_sub_itself_in_shortage": 6,
+  "rag_trap_total": 14,
+  "graph_found_independent_substitute": 15
+ },
+ "rows": [
+  {
+   "drug": "BUPIVACAINE HYDROCHLORIDE",
+   "rag_substitute": "ROPIVACAINE HYDROCHLORIDE",
+   "similarity": 0.107,
+   "shared_plants": [
+    {
+     "plant": "EUGIA PHARMA SPECIALITIES LIMITED",
+     "fei": "3008461619",
+     "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "1450022",
+     "country": "USA",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": true,
+   "trap": true,
+   "graph_independent_options": [
+    "LIDOCAINE",
+    "PRILOCAINE HYDROCHLORIDE"
+   ],
+   "graph_candidates": 5
+  },
+  {
+   "drug": "CARBOPLATIN",
+   "rag_substitute": "CISPLATIN",
+   "similarity": 0.1684,
+   "shared_plants": [
+    {
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "1450022",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Gland Pharma Limited",
+     "fei": "3009056604",
+     "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "Intas Pharmaceuticals Limited",
+     "fei": "3004011473",
+     "country": "IND",
+     "flagged": true
+    }
+   ],
+   "rag_sub_also_short": false,
+   "trap": true,
+   "graph_independent_options": [],
+   "graph_candidates": 2
+  },
+  {
+   "drug": "CLONAZEPAM",
+   "rag_substitute": "DIAZEPAM",
+   "similarity": 0.2151,
+   "shared_plants": [
+    {
+     "plant": "APL HEALTHCARE LIMITED",
+     "fei": "3011895410",
+     "country": "IND",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": false,
+   "trap": true,
+   "graph_independent_options": [
+    "CHLORDIAZEPOXIDE HYDROCHLORIDE",
+    "MIDAZOLAM HYDROCHLORIDE",
+    "ALPRAZOLAM"
+   ],
+   "graph_candidates": 7
+  },
+  {
+   "drug": "DEXMEDETOMIDINE HYDROCHLORIDE",
+   "rag_substitute": "MIDAZOLAM HYDROCHLORIDE",
+   "similarity": 0.1619,
+   "shared_plants": [
+    {
+     "plant": "GLAND PHARMA LIMITED",
+     "fei": "3002647489",
+     "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "Hospira, Inc.",
+     "fei": "1925262",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "3001833549",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Hospira, Inc.",
+     "fei": "1021343",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Pfizer Healthcare India Private Limited",
+     "fei": "3008316085",
+     "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "GLAND PHARMA LIMITED",
+     "fei": "3009864167",
+     "country": "IND",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": true,
+   "trap": true,
+   "graph_independent_options": [
+    "GUANFACINE",
+    "TIZANIDINE HYDROCHLORIDE",
+    "METHYLDOPA",
+    "GUANFACINE HYDROCHLORIDE",
+    "CLONIDINE",
+    "CLONIDINE HYDROCHLORIDE"
+   ],
+   "graph_candidates": 7
+  },
+  {
+   "drug": "DEXTROSE MONOHYDRATE",
+   "rag_substitute": "NOREPINEPHRINE BITARTRATE",
+   "similarity": 0.2787,
+   "shared_plants": [],
+   "rag_sub_also_short": false,
+   "trap": false,
+   "graph_independent_options": [],
+   "graph_candidates": 0
+  },
+  {
+   "drug": "DOPAMINE HYDROCHLORIDE",
+   "rag_substitute": "MEXILETINE HYDROCHLORIDE",
+   "similarity": 0.2131,
+   "shared_plants": [],
+   "rag_sub_also_short": false,
+   "trap": false,
+   "graph_independent_options": [
+    "EPINEPHRINE",
+    "NOREPINEPHRINE BITARTRATE",
+    "EPINEPHRINE BITARTRATE"
+   ],
+   "graph_candidates": 3
+  },
+  {
+   "drug": "FUROSEMIDE",
+   "rag_substitute": "TORSEMIDE",
+   "similarity": 0.1854,
+   "shared_plants": [
+    {
+     "plant": "West-Ward Columbus Inc.",
+     "fei": "1510690",
+     "country": "USA",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": false,
+   "trap": true,
+   "graph_independent_options": [
+    "ETHACRYNATE SODIUM",
+    "ETHACRYNIC ACID"
+   ],
+   "graph_candidates": 4
+  },
+  {
+   "drug": "HYDROMORPHONE HYDROCHLORIDE",
+   "rag_substitute": "TRAMADOL HYDROCHLORIDE",
+   "similarity": 0.1647,
+   "shared_plants": [],
+   "rag_sub_also_short": false,
+   "trap": false,
+   "graph_independent_options": [
+    "TRAMADOL HYDROCHLORIDE"
+   ],
+   "graph_candidates": 4
+  },
+  {
+   "drug": "KETOROLAC TROMETHAMINE",
+   "rag_substitute": "ETODOLAC",
+   "similarity": 0.2043,
+   "shared_plants": [
+    {
+     "plant": "Zydus Lifesciences Limited",
+     "fei": "3002984011",
+     "country": "IND",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": false,
+   "trap": true,
+   "graph_independent_options": [
+    "DICLOFENAC SODIUM",
+    "NAPROXEN SODIUM",
+    "IBUPROFEN",
+    "CELECOXIB",
+    "IBUPROFEN LYSINE"
+   ],
+   "graph_candidates": 9
+  },
+  {
+   "drug": "LIDOCAINE HYDROCHLORIDE",
+   "rag_substitute": "ROPIVACAINE HYDROCHLORIDE",
+   "similarity": 0.2079,
+   "shared_plants": [
+    {
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "1450022",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "EUGIA PHARMA SPECIALITIES LIMITED",
+     "fei": "3008461619",
+     "country": "IND",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": true,
+   "trap": true,
+   "graph_independent_options": [
+    "PRILOCAINE HYDROCHLORIDE",
+    "MEXILETINE HYDROCHLORIDE"
+   ],
+   "graph_candidates": 10
+  },
+  {
+   "drug": "LIDOCAINE HYDROCHLORIDE ANHYDROUS",
+   "rag_substitute": "ROPIVACAINE HYDROCHLORIDE",
+   "similarity": 0.1816,
+   "shared_plants": [
+    {
+     "plant": "HP Halden Pharma AS",
+     "fei": "3002608066",
+     "country": "NOR",
+     "flagged": false
+    },
+    {
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "1450022",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Fresenius Kabi Austria",
+     "fei": "3003708554",
+     "country": "AUT",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": true,
+   "trap": true,
+   "graph_independent_options": [
+    "PRILOCAINE HYDROCHLORIDE",
+    "FLECAINIDE ACETATE",
+    "PROPAFENONE HYDROCHLORIDE",
+    "SOTALOL HYDROCHLORIDE",
+    "MEXILETINE HYDROCHLORIDE"
+   ],
+   "graph_candidates": 10
+  },
+  {
+   "drug": "LISDEXAMFETAMINE DIMESYLATE",
+   "rag_substitute": "DEXMETHYLPHENIDATE HYDROCHLORIDE",
+   "similarity": 0.2092,
+   "shared_plants": [
+    {
+     "plant": "Ohm Laboratories Inc.",
+     "fei": "3004132058",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Ascent Pharmaceuticals Inc",
+     "fei": "3009518416",
+     "country": "USA",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": false,
+   "trap": true,
+   "graph_independent_options": [
+    "CAFFEINE CITRATE",
+    "CAFFEINE"
+   ],
+   "graph_candidates": 6
+  },
+  {
+   "drug": "LORAZEPAM",
+   "rag_substitute": "CHLORDIAZEPOXIDE HYDROCHLORIDE",
+   "similarity": 0.2066,
+   "shared_plants": [],
+   "rag_sub_also_short": false,
+   "trap": false,
+   "graph_independent_options": [
+    "CHLORDIAZEPOXIDE HYDROCHLORIDE",
+    "TEMAZEPAM"
+   ],
+   "graph_candidates": 7
+  },
+  {
+   "drug": "METHYLPHENIDATE HYDROCHLORIDE",
+   "rag_substitute": "DEXMETHYLPHENIDATE HYDROCHLORIDE",
+   "similarity": 0.1666,
+   "shared_plants": [
+    {
+     "plant": "Ohm Laboratories Inc.",
+     "fei": "3004132058",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Novel Laboratories, Inc.",
+     "fei": "3006271438",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Alkem Laboratories Limited",
+     "fei": "3006370524",
+     "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "KVK-TECH, INC.",
+     "fei": "3005117563",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Ascent Pharmaceuticals Inc",
+     "fei": "3009518416",
+     "country": "USA",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": false,
+   "trap": true,
+   "graph_independent_options": [
+    "CAFFEINE",
+    "CAFFEINE CITRATE"
+   ],
+   "graph_candidates": 6
+  },
+  {
+   "drug": "MIDAZOLAM HYDROCHLORIDE",
+   "rag_substitute": "DEXMEDETOMIDINE HYDROCHLORIDE",
+   "similarity": 0.1619,
+   "shared_plants": [
+    {
+     "plant": "Hospira, Inc.",
+     "fei": "1021343",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "GLAND PHARMA LIMITED",
+     "fei": "3002647489",
+     "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "GLAND PHARMA LIMITED",
+     "fei": "3009864167",
+     "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "3001833549",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "Pfizer Healthcare India Private Limited",
+     "fei": "3008316085",
+     "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "Hospira, Inc.",
+     "fei": "1925262",
+     "country": "USA",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": true,
+   "trap": true,
+   "graph_independent_options": [
+    "TEMAZEPAM",
+    "CHLORDIAZEPOXIDE HYDROCHLORIDE",
+    "CLONAZEPAM",
+    "CLOBAZAM"
+   ],
+   "graph_candidates": 7
+  },
+  {
+   "drug": "MORPHINE SULFATE",
+   "rag_substitute": "HYDROCODONE BITARTRATE",
+   "similarity": 0.1554,
+   "shared_plants": [
+    {
+     "plant": "Knoa Pharmaceuticals LLC",
+     "fei": "3002960808",
+     "country": "USA",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": false,
+   "trap": true,
+   "graph_independent_options": [
+    "TRAMADOL HYDROCHLORIDE"
+   ],
+   "graph_candidates": 4
+  },
+  {
+   "drug": "ROCURONIUM BROMIDE",
+   "rag_substitute": "VECURONIUM BROMIDE",
+   "similarity": 0.1852,
+   "shared_plants": [
+    {
+     "plant": "EUGIA PHARMA SPECIALITIES LIMITED",
+     "fei": "3008461619",
+     "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "GLAND PHARMA LIMITED",
+     "fei": "3002647489",
+     "country": "IND",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": false,
+   "trap": true,
+   "graph_independent_options": [],
+   "graph_candidates": 3
+  },
+  {
+   "drug": "ROPIVACAINE HYDROCHLORIDE",
+   "rag_substitute": "BUPIVACAINE HYDROCHLORIDE",
+   "similarity": 0.107,
+   "shared_plants": [
+    {
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "1450022",
+     "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "EUGIA PHARMA SPECIALITIES LIMITED",
+     "fei": "3008461619",
+     "country": "IND",
+     "flagged": false
+    }
+   ],
+   "rag_sub_also_short": true,
+   "trap": true,
+   "graph_independent_options": [
+    "PRILOCAINE HYDROCHLORIDE",
+    "LIDOCAINE"
+   ],
+   "graph_candidates": 5
+  }
+ ]
+}
