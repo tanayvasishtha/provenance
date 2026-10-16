@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- A pharmacy cross drawn as a graph: four drugs joined to one plant, the single source they all depend on. -->
+  <rect width="32" height="32" rx="8" fill="#F2B441"/>
+  <g stroke="#083F42" stroke-width="2.4" stroke-linecap="round">
+    <path d="M16 16V5M16 16h11M16 16v11M16 16H5"/>
+  </g>
+  <g fill="#083F42"><circle cx="16" cy="5" r="2.7"/><circle cx="27" cy="16" r="2.7"/><circle cx="16" cy="27" r="2.7"/><circle cx="5" cy="16" r="2.7"/></g>
+  <circle cx="16" cy="16" r="4.6" fill="#B8231A" stroke="#F2B441" stroke-width="1.6"/>
+</svg>

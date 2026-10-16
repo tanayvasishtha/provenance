@@ -43,14 +43,11 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--teal-50); p
 .appbar { position: sticky; top: 0; z-index: 10; background: rgba(8, 63, 66, 0.96); backdrop-filter: saturate(140%) blur(8px); color: #fff; }
 .appbar-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); min-height: 64px; }
 .wordmark {
-  display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 12px; text-decoration: none;
   font-family: var(--display); font-weight: 900; font-stretch: 118%; font-size: 1.35em; letter-spacing: -0.01em;
 }
-/* Mark: a drug node joined to a plant node, the product's whole idea in two dots. */
-.mark { width: 26px; height: 14px; position: relative; flex: none; }
-.mark::before, .mark::after { content: ""; position: absolute; top: 2px; width: 10px; height: 10px; border-radius: 50%; }
-.mark::before { left: 0; background: var(--amber); }
-.mark::after { right: 0; background: var(--red-on-tray); box-shadow: -8px 0 0 -3px #fff; }
+/* Mark: a pharmacy cross drawn as a graph, four drugs on one plant (logo.svg is the same drawing). */
+.mark { width: 32px; height: 32px; flex: none; display: block; }
 .tabs { display: flex; gap: 2px; padding: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow-x: auto; }
 .tabs a {
   display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--s4); border-radius: 999px;

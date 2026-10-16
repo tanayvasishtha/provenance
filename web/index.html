@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Provenance</title>
 <meta name="description" content="Checks whether the substitute for a drug in shortage is made in the same plant.">
+<link rel="icon" type="image/svg+xml" href="/static/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +16,17 @@
 
 <header class="appbar">
   <div class="wrap appbar-inner">
-    <a class="wordmark" href="#check"><span class="mark" aria-hidden="true"></span>Provenance</a>
+    <a class="wordmark" href="#check">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="#F2B441"/>
+        <g stroke="#083F42" stroke-width="2.4" stroke-linecap="round">
+          <path d="M16 16V5M16 16h11M16 16v11M16 16H5"/>
+        </g>
+        <g fill="#083F42"><circle cx="16" cy="5" r="2.7"/><circle cx="27" cy="16" r="2.7"/><circle cx="16" cy="27" r="2.7"/><circle cx="5" cy="16" r="2.7"/></g>
+        <circle cx="16" cy="16" r="4.6" fill="#B8231A" stroke="#F2B441" stroke-width="1.6"/>
+      </svg>
+      Provenance
+    </a>
     <nav class="tabs" aria-label="Views">
       <a href="#check" data-view="check" aria-current="page">Check a substitute</a>
       <a href="#ask" data-view="ask">Ask the agent</a>
