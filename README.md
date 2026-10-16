@@ -18,7 +18,7 @@ That failure repeats. ASHP counted 227 active US drug shortages in Q2 2026, and 
 - Ask the agent: a pharmacist asks in plain English and the agent picks graph queries as tools; every plant, FEI number and date in its answer comes from a tool result, and the page lists each tool call with its Cypher. With an Anthropic key it runs on Claude Opus 5.5. The live demo has no key, so it runs the graph-only planner over the same nine tools, and the page says so.
 - Hospital memory: each hospital is its own FalkorDB graph on the same server. It records what the hospital stocks and every substitution it decided, with the earlier decision kept and linked to the one that replaced it. When the pharmacist says "we switched cisplatin to oxaliplatin", the agent records it and warns that oxaliplatin also comes out of the Intas plant.
 - If a plant stops: pick a plant. The page lists every drug that depends on it, and reads the same event through each hospital's memory graph. One FDA action on the Intas plant hits three stocked drugs at the oncology centre, dexmedetomidine at the surgical hospital, and furosemide at the children's hospital.
-- Where the risk sits: plants ranked by how much of today's shortage drugs they carry.
+- Where the risk sits: plants ranked by how much of today's shortage drugs they carry, and plants ranked by exact betweenness centrality (FalkorDB `algo.betweenness`), which finds the plants that tie separate drug supply chains together.
 
 The three hospitals are synthetic demo tenants. Every drug, plant and FDA action they point at is a real record.
 
