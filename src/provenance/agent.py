@@ -213,7 +213,9 @@ def graph_only(question: str, hospital: str | None) -> dict:
         return {"mode": "graph-only", "answer": answer, "trace": trace}
 
     drug = _find_drug(question)
-    switched = re.search(r"\b(switched|switch(?:ing)?|chose|choosing|moved|moving|going with)\b", question, re.I)
+    # Only a statement of something already decided writes to memory; a question never does ("is X a safe switch?").
+    switched = not question.rstrip().endswith("?") and re.search(
+        r"\b(switched|have switched|are switching|chose|have chosen|went with|are going with|moved|decided on)\b", question, re.I)
     if drug and hospital and switched:
         rest = question[question.upper().index(moiety(drug)) + len(moiety(drug)):]
         sub = _find_drug(rest)

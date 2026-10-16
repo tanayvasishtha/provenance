@@ -64,3 +64,13 @@ def test_betweenness_top_three_holds_on_both_engines():
     # FalkorDB 4.22 and 6.0 give different exact scores on the same 671 edges, but the same top three plants.
     top = {r["fei"] for r in queries.bridges(3)}
     assert top == {"3011895410", "3001833549", "1510690"}
+
+
+def test_a_question_never_writes_to_memory(monkeypatch):
+    monkeypatch.setattr(agent.settings, "anthropic_api_key", "")
+    memory.forget("oncology-centre")
+    agent.ask("Cisplatin is short. Is carboplatin a safe switch?", "oncology-centre")
+    assert memory.profile("oncology-centre")["decisions"] == []
+    agent.ask("We switched cisplatin to oxaliplatin because carboplatin shares the Intas plant.", "oncology-centre")
+    assert memory.profile("oncology-centre")["decisions"][0]["substitute"] == "OXALIPLATIN"
+    memory.forget("oncology-centre")
