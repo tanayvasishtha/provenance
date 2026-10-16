@@ -4,6 +4,7 @@ import json
 import logging
 import re
 
+import redis
 from falkordb import FalkorDB
 
 from .build import SNAPSHOT
@@ -40,8 +41,8 @@ def load(snap: dict | None = None) -> dict:
     g = graph()
     try:
         g.delete()
-    except Exception:
-        pass
+    except redis.exceptions.ResponseError:
+        pass  # no graph yet
     g = graph()
     for label, prop in [("Product", "ndc"), ("Ingredient", "name"), ("Class", "name"), ("Company", "name"),
                         ("Facility", "duns"), ("Shortage", "package_ndc"), ("Action", "key")]:

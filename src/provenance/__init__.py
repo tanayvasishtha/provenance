@@ -1,6 +1,8 @@
 import argparse
 import logging
 
+import redis
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="provenance", description="Trace drugs and their substitutes to the plants that make them.")
@@ -15,6 +17,7 @@ def main() -> None:
     try:
         if args.command == "build":
             import asyncio
+
             from .build import build
             asyncio.run(build())
         elif args.command == "load":
@@ -28,5 +31,8 @@ def main() -> None:
         else:
             import uvicorn
             uvicorn.run("provenance.api:app", port=args.port)
-    except ConnectionError as e:
-        raise SystemExit(f"FalkorDB is not reachable ({e}). Start it with scripts/falkordb-wsl.sh or `docker run -p 6379:6379 falkordb/falkordb:v6.0.1`.")
+    except redis.exceptions.ConnectionError as e:
+        raise SystemExit(
+            f"FalkorDB is not reachable ({e}). Start it with scripts/falkordb-wsl.sh "
+            "or `docker run -p 6379:6379 falkordb/falkordb:v6.0.1`."
+        ) from None

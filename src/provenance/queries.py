@@ -74,7 +74,7 @@ ORDER BY products DESC, plant
 def run(cypher: str, **params) -> list[dict]:
     res = graph().ro_query(cypher, params)
     cols = [h[1] if isinstance(h, (list, tuple)) else h for h in res.header]
-    return [dict(zip(cols, row)) for row in res.result_set]
+    return [dict(zip(cols, row, strict=True)) for row in res.result_set]
 
 
 def trap(drug: str) -> list[dict]:

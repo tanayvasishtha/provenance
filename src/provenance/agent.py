@@ -10,7 +10,6 @@ import hashlib
 import json
 import logging
 import re
-from pathlib import Path
 
 from . import memory, queries
 from .baseline import moiety
@@ -42,27 +41,30 @@ DRUG = {"drug": {"type": "string", "description": "Substance name as on FDA labe
 HOSP = {"hospital": {"type": "string", "enum": list(memory.DEMO_HOSPITALS), "description": "Hospital tenant slug."}}
 FEI = {"fei": {"type": "string", "description": "FDA Facility Establishment Identifier of the plant."}}
 
+def _tool(name: str, description: str, props: dict, required: list[str]) -> dict:
+    return {"name": name, "description": description, "input_schema": _schema(props, required), "strict": True}
+
+
+DECISION = {**HOSP, **DRUG, "substitute": {"type": "string"}, "reason": {"type": "string"}}
+
 TOOLS = [
-    {"name": "plants_for_drug", "description": "Every plant that manufactures the drug, with FEI, country, label count and FDA import alert dates.",
-     "input_schema": _schema(DRUG, ["drug"])},
-    {"name": "substitute_trap", "description": "Same-class substitutes for the drug and the manufacturing plants each shares with it.",
-     "input_schema": _schema(DRUG, ["drug"])},
-    {"name": "safe_substitutes", "description": "Same-class substitutes that share no manufacturing plant with the drug, with label count, flagged plants and shortage status.",
-     "input_schema": _schema(DRUG, ["drug"])},
-    {"name": "plant_impact", "description": "Every drug a plant manufactures, its share of US labels, and whether it is on the shortage list now.",
-     "input_schema": _schema(FEI, ["fei"])},
-    {"name": "riskiest_plants", "description": "Plants ranked by how much of today's shortage drugs they carry.",
-     "input_schema": _schema({"limit": {"type": "integer", "description": "How many plants, 1 to 25."}}, ["limit"])},
-    {"name": "hospital_memory", "description": "What this hospital stocks and every substitution it decided before, newest first.",
-     "input_schema": _schema(HOSP, ["hospital"])},
-    {"name": "record_decision", "description": "Store the pharmacist's chosen substitute in the hospital's own graph.",
-     "input_schema": _schema({**HOSP, **DRUG, "substitute": {"type": "string"}, "reason": {"type": "string"}},
-                             ["hospital", "drug", "substitute", "reason"])},
-    {"name": "plant_alert", "description": "If this plant stops, which drugs and past decisions each hospital is exposed through.",
-     "input_schema": _schema(FEI, ["fei"])},
+    _tool("plants_for_drug", "Every plant that manufactures the drug, with FEI, country, label count and FDA import alert dates.",
+          DRUG, ["drug"]),
+    _tool("substitute_trap", "Same-class substitutes for the drug and the manufacturing plants each shares with it.",
+          DRUG, ["drug"]),
+    _tool("safe_substitutes", "Same-class substitutes that share no manufacturing plant with the drug, "
+          "with label count, flagged plants and shortage status.", DRUG, ["drug"]),
+    _tool("plant_impact", "Every drug a plant manufactures, its share of US labels, and whether it is on the shortage list now.",
+          FEI, ["fei"]),
+    _tool("riskiest_plants", "Plants ranked by how much of today's shortage drugs they carry.",
+          {"limit": {"type": "integer", "description": "How many plants, 1 to 25."}}, ["limit"]),
+    _tool("hospital_memory", "What this hospital stocks and every substitution it decided before, newest first.",
+          HOSP, ["hospital"]),
+    _tool("record_decision", "Store the pharmacist's chosen substitute in the hospital's own graph.",
+          DECISION, ["hospital", "drug", "substitute", "reason"]),
+    _tool("plant_alert", "If this plant stops, which drugs and past decisions each hospital is exposed through.",
+          FEI, ["fei"]),
 ]
-for t in TOOLS:
-    t["strict"] = True
 
 
 def _other(rows: list[dict], drug: str) -> list[dict]:
@@ -144,7 +146,7 @@ def ask(question: str, hospital: str | None = None) -> dict:
                     out, cypher = run_tool(c["name"], c["input"])
                     trace.append({"tool": c["name"], "input": c["input"], "cypher": cypher.strip(), "rows": _count(out)})
                     results.append({"type": "tool_result", "tool_use_id": c["id"], "content": json.dumps(out, default=str)})
-                except Exception as e:  # a bad tool call goes back to the model as an error, not a crash
+                except Exception as e:  # noqa: BLE001  a bad tool call goes back to the model as an error, not a crash
                     results.append({"type": "tool_result", "tool_use_id": c["id"], "content": f"Error: {e}", "is_error": True})
             messages.append({"role": "user", "content": results})
         return {"mode": "live", "answer": "Stopped after too many steps without an answer.", "trace": trace}
@@ -210,7 +212,8 @@ def graph_only(question: str, hospital: str | None) -> dict:
             return {"mode": "graph-only", "trace": trace,
                     "answer": f"Recorded for this hospital: {drug.title()} switched to {sub.title()} on {saved['at'][:10]}.{note}"}
     if not drug:
-        return {"mode": "graph-only", "answer": "Name a drug from the shortage list or a plant FEI number, and I will trace it.", "trace": trace}
+        hint = "Name a drug from the shortage list or a plant FEI number, and I will trace it."
+        return {"mode": "graph-only", "answer": hint, "trace": trace}
     plants = call("plants_for_drug", drug=drug)
     traps = [t for t in call("substitute_trap", drug=drug) if t["shared_plants"]]
     safe = call("safe_substitutes", drug=drug)
@@ -220,8 +223,9 @@ def graph_only(question: str, hospital: str | None) -> dict:
         parts.append("Under FDA Import Alert 66-40: " + "; ".join(
             f"{p['plant']} (FEI {p['fei']}, listed {', '.join(p['import_alert_dates'])})" for p in flagged) + ".")
     for t in traps[:3]:
-        parts.append(f"{t['substitute'].title()} shares {len(t['shared_plants'])} plant{'s' if len(t['shared_plants']) > 1 else ''} with it: "
-                     + ", ".join(f"{p['plant']} (FEI {p['fei']})" for p in t["shared_plants"]) + ".")
+        n = len(t["shared_plants"])
+        plants_txt = ", ".join(f"{p['plant']} (FEI {p['fei']})" for p in t["shared_plants"])
+        parts.append(f"{t['substitute'].title()} shares {n} plant{'s' if n > 1 else ''} with it: {plants_txt}.")
     if safe:
         parts.append("Same-class options with no shared plant: " + ", ".join(
             f"{s['substitute'].title()} ({s['labels']} labels{', short now' if s['short_now'] else ''})" for s in safe[:4]) + ".")
@@ -232,5 +236,6 @@ def graph_only(question: str, hospital: str | None) -> dict:
         mem = call("hospital_memory", hospital=hospital)
         past = [d for d in mem["decisions"] if d["drug"] == drug]
         if past:
-            parts.append(f"Last time, {mem['name']} switched {drug.title()} to {past[0]['substitute'].title()} ({past[0]['at'][:10]}).")
+            last = past[0]
+            parts.append(f"Last time, {mem['name']} switched {drug.title()} to {last['substitute'].title()} ({last['at'][:10]}).")
     return {"mode": "graph-only", "answer": " ".join(parts), "trace": trace}

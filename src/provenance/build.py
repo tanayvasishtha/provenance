@@ -4,9 +4,9 @@ import asyncio
 import json
 import logging
 
+from . import sources
 from .config import ROOT, settings
 from .fetch import Fetcher
-from . import sources
 
 log = logging.getLogger("build")
 

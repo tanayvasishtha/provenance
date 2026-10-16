@@ -4,7 +4,7 @@ decisions. The supply graph is shared; a hospital graph only records what that h
 Hospitals here are synthetic demo tenants; every drug, plant and FDA action they point at is real.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from falkordb import FalkorDB
 
@@ -43,7 +43,7 @@ def _g(hospital: str):
 
 def _rows(res) -> list[dict]:
     cols = [h[1] if isinstance(h, (list, tuple)) else h for h in res.header]
-    return [dict(zip(cols, r)) for r in res.result_set]
+    return [dict(zip(cols, r, strict=True)) for r in res.result_set]
 
 
 def seed(reset: bool = False) -> None:
@@ -78,7 +78,7 @@ def record_decision(hospital: str, drug: str, substitute: str, reason: str) -> d
     """Store a substitution decision in the hospital's own graph. Superseded decisions for the same drug are kept,
     linked by REPLACED_BY, so the history of what was switched and why stays queryable."""
     g = _g(hospital)
-    at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    at = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     params = {"drug": drug.upper(), "sub": substitute.upper(), "reason": reason, "at": at}
     g.query("MATCH (h:Hospital) CREATE (h)-[:DECIDED]->(:Decision {drug: $drug, substitute: $sub, reason: $reason, at: $at})", params)
     # The older current decision for this drug steps aside: it stays in the graph, linked to the one that replaced it.

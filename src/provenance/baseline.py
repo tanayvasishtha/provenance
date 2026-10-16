@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 
+import redis
 from lxml import etree
 
 from .build import SNAPSHOT
@@ -67,10 +68,10 @@ def embed_ingredients() -> int:
     g = graph()
     try:
         g.query(f"CREATE VECTOR INDEX FOR (i:Ingredient) ON (i.vec) OPTIONS {{dimension:{DIM}, similarityFunction:'cosine'}}")
-    except Exception:
-        pass
+    except redis.exceptions.ResponseError:
+        pass  # index already exists
     g.query("UNWIND $rows AS r MATCH (i:Ingredient {name: r.n}) SET i.vec = vecf32(r.v), i.label_text = r.t",
-            {"rows": [{"n": n, "v": [float(x) for x in v], "t": texts[n]} for n, v in zip(names, vecs)]})
+            {"rows": [{"n": n, "v": [float(x) for x in v], "t": texts[n]} for n, v in zip(names, vecs, strict=True)]})
     log.info("embedded %d of %d ingredients", len(names), len({s for p in snap["products"] for s in p["substances"]}))
     return len(names)
 
