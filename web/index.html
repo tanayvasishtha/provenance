@@ -7,15 +7,18 @@
 <meta name="description" content="Checks whether the substitute for a drug in shortage is made in the same plant.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header class="masthead">
-  <div class="wrap">
-    <h1>Provenance</h1>
-    <p class="purpose">When a drug runs short, check whether its substitute comes out of the same plant.</p>
+
+<header class="band">
+  <div class="wrap band-inner">
+    <div class="brand">
+      <h1 class="wordmark">Provenance</h1>
+      <p class="purpose">When a drug runs short, check whether its substitute comes out of the same plant.</p>
+    </div>
     <p class="freshness" id="freshness">Reading the graph...</p>
   </div>
   <nav class="wrap tabs" aria-label="Views">
@@ -29,9 +32,9 @@
 <main id="main" class="wrap">
 
   <section id="view-check" data-view-panel="check">
-    <form class="ask" id="check-form">
+    <form class="picker" id="check-form">
       <label for="drug">Drug to check</label>
-      <div class="ask-row">
+      <div class="picker-row">
         <select id="drug" name="drug" required><option value="">Loading the shortage list...</option></select>
         <button type="submit">Check substitutes</button>
       </div>
@@ -41,29 +44,35 @@
 
     <div id="check-result" hidden>
       <div class="compare">
-        <article class="side side-rag">
-          <h2>Similar-text pick</h2>
-          <p class="method">What a search over label text suggests: the substitute whose label reads most like this one.</p>
-          <ol id="rag-list" class="picks"></ol>
+        <article class="label label-search">
+          <header class="label-head">
+            <h2>A label search suggests</h2>
+            <p>The substitute whose label text reads most like this drug's.</p>
+          </header>
+          <p class="drugname" id="rag-top"></p>
+          <p class="drugname-sub" id="rag-sub"></p>
+          <ol id="rag-list" class="picks" start="2"></ol>
         </article>
-        <article class="side side-graph">
-          <h2>Supply graph</h2>
-          <p class="method">The same pick, checked against the plants that make both drugs.</p>
+        <article class="label label-graph">
+          <header class="label-head">
+            <h2>The supply graph says</h2>
+            <p>The same pick, checked against the plants named on both drugs' labels.</p>
+          </header>
           <div id="verdict"></div>
-          <h3>No shared manufacturing plant</h3>
+          <h3 class="subhead">Same class, no shared plant</h3>
           <ul id="safe-list" class="safe"></ul>
         </article>
       </div>
 
-      <figure class="chain-fig">
-        <figcaption>
-          <span>Drug checked</span><span>Plants that make it</span><span>Substitutes those plants also make</span>
+      <figure class="tray">
+        <figcaption class="tray-cols">
+          <span>Drug checked</span><span>Plants named on its labels</span><span>Substitutes those plants also make</span>
         </figcaption>
         <svg id="chain" role="img" aria-labelledby="chain-desc"></svg>
         <p id="chain-desc" class="chain-desc"></p>
       </figure>
 
-      <h2 class="table-title">Evidence</h2>
+      <h2 class="section-title">Evidence</h2>
       <div class="table-scroll">
         <table id="evidence">
           <thead><tr><th scope="col">Plant</th><th scope="col">FEI</th><th scope="col">Country</th><th scope="col">Labels of this drug</th><th scope="col">Also makes</th><th scope="col">FDA import alert 66-40</th></tr></thead>
@@ -77,33 +86,34 @@
   <section id="view-ask" data-view-panel="ask" hidden>
     <div class="ask-layout">
       <div>
-        <form class="ask" id="ask-form">
+        <form class="picker" id="ask-form">
           <label for="hospital">Hospital</label>
           <select id="hospital" name="hospital"></select>
           <label for="question" class="second">Question</label>
           <textarea id="question" name="question" rows="3" required minlength="3" maxlength="600" placeholder="Cisplatin is short. Is carboplatin a safe switch?"></textarea>
-          <p class="examples">Try:
+          <div class="examples">
+            <p>Try one</p>
             <button type="button" class="example">Cisplatin is short. Is carboplatin a safe switch?</button>
             <button type="button" class="example">We switched cisplatin to oxaliplatin because carboplatin shares the Intas plant.</button>
             <button type="button" class="example">What do we stock that FEI 3004011473 makes?</button>
             <button type="button" class="example">Which plants are the riskiest bridges between drug supply chains?</button>
-          </p>
+          </div>
           <button type="submit">Ask</button>
         </form>
         <div id="ask-state" class="state" role="status" aria-live="polite"></div>
         <article id="ask-result" hidden>
           <p class="mode" id="ask-mode"></p>
           <div id="ask-answer" class="answer"></div>
-          <h3>What the agent ran</h3>
+          <h3 class="subhead">What the agent ran</h3>
           <ol id="ask-trace" class="trace"></ol>
         </article>
       </div>
       <aside class="memory" aria-labelledby="memory-title">
         <h2 id="memory-title">This hospital's memory</h2>
-        <p class="method">Its own FalkorDB graph. Other hospitals never see it.</p>
-        <h3>Stocks</h3>
+        <p>Its own FalkorDB graph. Other hospitals never see it.</p>
+        <h3 class="subhead">Stocks</h3>
         <ul id="mem-stocks" class="plain"></ul>
-        <h3>Substitutions decided</h3>
+        <h3 class="subhead">Substitutions decided</h3>
         <ol id="mem-decisions" class="plain"></ol>
         <button type="button" id="forget" class="quiet">Clear this hospital's decisions</button>
       </aside>
@@ -111,9 +121,9 @@
   </section>
 
   <section id="view-plant" data-view-panel="plant" hidden>
-    <form class="ask" id="plant-form">
+    <form class="picker" id="plant-form">
       <label for="plant">Plant (FDA FEI number)</label>
-      <div class="ask-row">
+      <div class="picker-row">
         <select id="plant" name="plant" required><option value="">Loading plants...</option></select>
         <button type="submit">Show what stops</button>
       </div>
@@ -127,16 +137,16 @@
         </table>
       </div>
       <p class="note">Share counts labels, not volume. FDA does not publish how much each plant ships.</p>
-      <h2 class="table-title">Which hospitals feel it</h2>
-      <p class="method">The same plant, read against each hospital's own memory graph: what it stocks, and the substitutes it already chose.</p>
+      <h2 class="section-title">Which hospitals feel it</h2>
+      <p class="lede">The same plant, read against each hospital's own memory graph: what it stocks, and the substitutes it already chose.</p>
       <div id="plant-alerts" class="alerts"></div>
       <details class="cypher"><summary>Show the Cypher</summary><pre id="plant-cypher"></pre></details>
     </div>
   </section>
 
   <section id="view-risk" data-view-panel="risk" hidden>
-    <h2 class="view-title">Plants that carry the most of today's shortage drugs</h2>
-    <p class="method">For each drug on the shortage list, the share of its US labels each plant makes, summed per plant. Read it as "where a supplier review should start".</p>
+    <h2 class="section-title first">Plants that carry the most of today's shortage drugs</h2>
+    <p class="lede">For each drug on the shortage list, the share of its US labels each plant makes, summed per plant. Read it as where a supplier review should start.</p>
     <div id="risk-state" class="state" role="status" aria-live="polite">Ranking plants...</div>
     <div class="table-scroll">
       <table id="risk-table" hidden>
@@ -146,8 +156,8 @@
     </div>
     <details class="cypher"><summary>Show the Cypher</summary><pre id="risk-cypher"></pre></details>
 
-    <h2 class="table-title">Plants that tie separate drug supply chains together</h2>
-    <p class="method">Betweenness centrality (FalkorDB <code>algo.betweenness</code>) on a graph of plants and the drugs they make. A high score means many drug-to-drug supply paths run through this plant, so a failure there spreads shortages across drug classes, not just within one.</p>
+    <h2 class="section-title">Plants that tie separate drug supply chains together</h2>
+    <p class="lede">Betweenness centrality (FalkorDB <code>algo.betweenness</code>) on a graph of plants and the drugs they make. A high score means many drug-to-drug supply paths run through this plant, so a failure there spreads shortages across drug classes, not just within one.</p>
     <div id="bridge-state" class="state" role="status" aria-live="polite">Running betweenness centrality...</div>
     <div class="table-scroll">
       <table id="bridge-table" hidden>
@@ -163,7 +173,8 @@
 <footer class="colophon">
   <div class="wrap">
     <p>Sources: <a href="https://open.fda.gov/apis/drug/drugshortages/">openFDA drug shortages</a>, <a href="https://open.fda.gov/apis/drug/ndc/">openFDA NDC directory</a>, <a href="https://dailymed.nlm.nih.gov/dailymed/">DailyMed label establishments</a>, <a href="https://www.fda.gov/drugs/drug-approvals-and-databases/drug-establishments-current-registration-site">FDA establishment registry</a>, <a href="https://www.accessdata.fda.gov/cms_ia/importalert_189.html">FDA Import Alert 66-40</a>. Graph in FalkorDB.</p>
-    <p>"Same class" means the same FDA pharmacologic class, not proof two drugs are interchangeable. A pharmacist decides. Not medical advice.</p>
+    <p>Look-alike drug names are set in Tall Man lettering (CISplatin, CARBOplatin), the convention pharmacies use to stop mix-ups. "Same class" means the same FDA pharmacologic class, not proof two drugs are interchangeable. A pharmacist decides. Not medical advice.</p>
+    <p><a href="https://github.com/tanayvasishtha/provenance">Source code and method</a></p>
   </div>
 </footer>
 <script src="/static/app.js"></script>

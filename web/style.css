@@ -1,14 +1,21 @@
-/* Direction: DESIGN.md. Printed public record: paper, ink, one vermilion for "same plant". */
+/* Direction: a pharmacy dispensing label. Teal is structure, red means "same plant / FDA action",
+   amber means "on the shortage list now". Archivo (condensed to wide) for names, Public Sans for reading. */
 :root {
-  --paper: #FBFAF7;
+  --paper: #F6F7F5;
   --sheet: #FFFFFF;
-  --ink: #1B1F24;
-  --ink-2: #4A5560;
-  --rule: #D9D6CF;
-  --rule-strong: #8A8F94;
-  --alert: #B3261E;
-  --alert-tint: #FBEDEC;
-  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 20px; --s5: 32px; --s6: 52px;
+  --ink: #13212B;
+  --steel: #4E5D68;
+  --rule: #D3D8DA;
+  --teal: #0B5E5E;
+  --tray: #083F42;
+  --tray-line: #5E9C98;
+  --on-tray: #E7F1EF;
+  --red: #B8231A;
+  --red-soft: #FCECEA;
+  --red-on-tray: #FF8E7F;
+  --amber: #F2B441;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 20px; --s5: 32px; --s6: 52px; --s7: 84px;
+  --display: "Archivo", "Arial Narrow", sans-serif;
   --sans: "Public Sans", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
 }
@@ -20,159 +27,197 @@ body {
   background: var(--paper);
   color: var(--ink);
   font: 400 clamp(15px, 0.9rem + 0.15vw, 17px)/1.55 var(--sans);
+  font-variant-numeric: tabular-nums;
 }
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--s4); }
-
-a { color: var(--ink); text-underline-offset: 3px; }
-:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--s4); }
+a { color: inherit; text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 .skip { position: absolute; left: -999px; }
-.skip:focus { left: var(--s3); top: var(--s3); background: var(--sheet); padding: var(--s2) var(--s3); z-index: 2; }
+.skip:focus { left: var(--s3); top: var(--s3); background: var(--sheet); padding: var(--s2) var(--s3); z-index: 3; }
+code { font-family: var(--mono); font-size: 0.92em; }
 
-/* Masthead reads like the head of a notice: name, purpose, provenance. */
-.masthead { border-bottom: 1px solid var(--rule-strong); padding-top: var(--s5); }
-.masthead h1 { font-size: clamp(28px, 1.4rem + 1.4vw, 40px); font-weight: 700; letter-spacing: -0.01em; margin: 0; }
-.purpose { margin: var(--s1) 0 0; font-size: 1.1em; max-width: 46ch; }
-.freshness { margin: var(--s3) 0 0; color: var(--ink-2); font-size: 0.9em; }
-.freshness .code { font-family: var(--mono); }
-
-.tabs { display: flex; gap: var(--s5); margin-top: var(--s4); overflow-x: auto; }
-.tabs a {
-  display: inline-block; padding: var(--s3) 0; min-height: 44px;
-  text-decoration: none; color: var(--ink-2); font-weight: 500; white-space: nowrap;
-  border-bottom: 3px solid transparent;
+/* The band: the coloured strip across the top of a drug label. */
+.band { background: var(--teal); color: #fff; }
+.band-inner {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: var(--s4) var(--s6); padding-top: var(--s6); padding-bottom: var(--s5);
 }
-.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
-.tabs a:hover { color: var(--ink); }
+.wordmark {
+  margin: 0; font-family: var(--display); font-weight: 900; font-stretch: 125%;
+  font-size: clamp(40px, 2rem + 3.6vw, 84px); line-height: 0.9; letter-spacing: -0.02em;
+}
+.purpose { margin: var(--s3) 0 0; font-size: 1.12em; max-width: 34ch; color: #DCEBE9; }
+.freshness { margin: 0; max-width: 40ch; font-size: 0.88em; color: #CFE3E0; }
+.freshness .code { font-weight: 600; color: #fff; }
 
-main.wrap { padding-top: var(--s5); padding-bottom: var(--s6); }
+/* Tabs sit on the band's lower edge like file tabs; the open one joins the page. */
+.tabs { display: flex; gap: var(--s1); overflow-x: auto; }
+.tabs a {
+  display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--s4);
+  font-family: var(--display); font-stretch: 100%; font-weight: 600; text-decoration: none; white-space: nowrap;
+  color: #DCEBE9; border-radius: 6px 6px 0 0;
+}
+.tabs a:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.tabs a[aria-current="page"] { background: var(--paper); color: var(--ink); }
 
-/* The question form */
-.ask label { display: block; font-weight: 600; margin-bottom: var(--s2); }
-.ask-row { display: flex; gap: var(--s3); flex-wrap: wrap; }
-select, button { font: inherit; min-height: 44px; border-radius: 2px; }
+main.wrap { padding-top: var(--s5); padding-bottom: var(--s7); }
+
+/* Forms */
+.picker label { display: block; font-weight: 600; margin-bottom: var(--s2); }
+.picker .second { margin-top: var(--s4); }
+.picker-row { display: flex; gap: var(--s3); flex-wrap: wrap; }
+select, button, textarea { font: inherit; border-radius: 4px; }
 select {
-  flex: 1 1 320px; max-width: 520px; padding: 0 var(--s3);
-  background: var(--sheet); color: var(--ink); border: 1px solid var(--rule-strong);
+  flex: 1 1 340px; max-width: 560px; min-height: 52px; padding: 0 var(--s3);
+  background: var(--sheet); color: var(--ink); border: 1.5px solid var(--ink); font-size: 1.05em;
+}
+textarea {
+  display: block; width: 100%; padding: var(--s3); background: var(--sheet); color: var(--ink);
+  border: 1.5px solid var(--ink); resize: vertical;
 }
 button {
-  padding: 0 var(--s4); background: var(--ink); color: var(--paper);
-  border: 1px solid var(--ink); font-weight: 600; cursor: pointer;
+  min-height: 52px; padding: 0 var(--s5); background: var(--teal); color: #fff; border: 0;
+  font-family: var(--display); font-stretch: 110%; font-weight: 700; font-size: 1.02em; cursor: pointer;
 }
-button:hover { background: #33393F; }
+button:hover { background: var(--tray); }
 button:disabled { opacity: 0.6; cursor: progress; }
 
-.state { margin: var(--s4) 0; color: var(--ink-2); }
-.state.error { color: var(--alert); font-weight: 500; }
+.state { margin: var(--s4) 0; color: var(--steel); }
+.state.error { color: var(--red); font-weight: 600; }
 
-/* Comparison: two different jobs, so two different weights. The graph side is the answer. */
-.compare { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--s5); margin-top: var(--s5); }
-.side h2 { font-size: 1.2em; margin: 0; }
-.method { color: var(--ink-2); margin: var(--s1) 0 var(--s3); max-width: 60ch; }
-.side-rag { padding-right: var(--s5); border-right: 1px solid var(--rule); }
-.picks { margin: 0; padding-left: var(--s4); }
-.picks li { padding: var(--s1) 0; }
-.picks .name { font-weight: 600; }
-.picks .score { font-family: var(--mono); color: var(--ink-2); font-size: 0.9em; margin-left: var(--s2); }
+/* Two drug labels side by side: what similar text says, what the graph says. */
+.compare { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: var(--s4); margin-top: var(--s5); }
+.label { background: var(--sheet); border: 1.5px solid var(--ink); border-radius: 8px; overflow: hidden; }
+.label-head { padding: var(--s3) var(--s4); border-bottom: 1.5px solid var(--ink); }
+.label-search .label-head { background: #E9EDEE; }
+.label-graph .label-head { background: var(--teal); color: #fff; border-bottom-color: var(--teal); }
+.label-head h2 { margin: 0; font-family: var(--display); font-stretch: 112%; font-weight: 800; font-size: 1.1em; }
+.label-head p { margin: 2px 0 0; font-size: 0.9em; opacity: 0.85; }
+.label > :not(.label-head) { margin-left: var(--s4); margin-right: var(--s4); }
 
-#verdict { padding: var(--s3) var(--s4); border: 1px solid var(--rule); background: var(--sheet); }
-#verdict.trap { border-color: var(--alert); background: var(--alert-tint); }
-#verdict .head { font-weight: 700; margin: 0 0 var(--s1); }
-#verdict.trap .head { color: var(--alert); }
-#verdict p { margin: var(--s1) 0 0; }
-.side-graph h3 { font-size: 1em; margin: var(--s4) 0 var(--s2); }
-.safe { list-style: none; margin: 0; padding: 0; }
-.safe li { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); padding: var(--s2) 0; border-top: 1px solid var(--rule); }
-.safe .name { font-weight: 600; flex: 1 1 200px; }
-.safe .facts { color: var(--ink-2); font-size: 0.92em; }
-.safe .none { color: var(--ink-2); }
+.drugname {
+  margin-top: var(--s4); margin-bottom: 0; font-family: var(--display); font-stretch: 72%; font-weight: 850;
+  font-size: clamp(40px, 1.6rem + 2.6vw, 64px); line-height: 0.95; letter-spacing: -0.01em; overflow-wrap: anywhere;
+}
+.drugname-sub { margin: var(--s2) 0 0; color: var(--steel); font-size: 0.92em; }
+.picks { margin: var(--s4) 0 var(--s4); padding: var(--s3) 0 0 var(--s4); border-top: 1px solid var(--rule); color: var(--steel); }
+.picks li { padding: 2px 0; }
+.picks .name { color: var(--ink); font-weight: 600; }
+.picks .score { margin-left: var(--s2); font-size: 0.9em; }
 
-/* The chain: the product's motif. Three columns, drawn in traversal order. */
-.chain-fig { margin: var(--s6) 0 0; padding: var(--s4) 0 0; border-top: 1px solid var(--rule-strong); }
-.chain-fig figcaption { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: var(--s3); color: var(--ink-2); font-size: 0.9em; font-weight: 500; }
-#chain { width: 100%; height: auto; display: block; margin-top: var(--s3); }
-#chain .node rect { fill: var(--sheet); stroke: var(--rule-strong); stroke-width: 1; }
-#chain .node.origin rect { fill: var(--ink); stroke: var(--ink); }
-#chain .node.origin text { fill: var(--paper); font-weight: 700; }
-#chain .node text { font: 500 16px var(--sans); fill: var(--ink); }
-#chain .node .sub { font: 400 13px var(--mono); fill: var(--ink-2); }
-#chain .node.flagged rect, #chain .node.shared rect { stroke: var(--alert); stroke-width: 2; }
-#chain .node.flagged .sub { fill: var(--alert); }
-#chain .edge { fill: none; stroke: var(--rule-strong); stroke-width: 1.25; }
-#chain .edge.hot { stroke: var(--alert); stroke-width: 2.5; }
-#chain .draw { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: draw 0.35s ease-out forwards; }
-#chain .appear { opacity: 0; animation: appear 0.2s ease-out forwards; }
+/* The verdict. A trap is drawn as an FDA boxed warning. */
+#verdict { margin-top: var(--s4); padding: var(--s3) var(--s4); border: 1.5px solid var(--rule); }
+#verdict .head { margin: 0; font-family: var(--display); font-stretch: 100%; font-weight: 800; font-size: 1.25em; line-height: 1.2; }
+#verdict p { margin: var(--s2) 0 0; }
+#verdict.trap { border: 3px solid var(--ink); background: var(--red-soft); }
+#verdict.trap .kicker { margin: 0 0 var(--s1); font-weight: 700; font-size: 0.85em; }
+#verdict.trap .head { color: var(--red); }
+#verdict .plant { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s1) var(--s3); }
+.stamp {
+  display: inline-block; padding: 1px var(--s2); border: 2px solid var(--red); color: var(--red);
+  font-family: var(--display); font-stretch: 90%; font-weight: 800; font-size: 0.82em; transform: rotate(-2deg);
+}
+.subhead { margin: var(--s4) 0 var(--s2); font-family: var(--display); font-stretch: 105%; font-weight: 700; font-size: 1em; }
+.safe { list-style: none; margin: 0 0 var(--s4); padding: 0; }
+.safe li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s1) var(--s3); padding: var(--s2) 0; border-top: 1px solid var(--rule); }
+.safe .name { font-weight: 700; }
+.safe .facts { color: var(--steel); font-size: 0.9em; }
+.safe .none { color: var(--steel); }
+.tag { display: inline-block; padding: 0 6px; border-radius: 3px; background: var(--amber); color: var(--ink); font-weight: 600; font-size: 0.85em; }
+
+/* The tray: the one dark, loud surface on the page, holding the path the graph walked. */
+.tray { margin: var(--s5) 0 0; padding: var(--s4) var(--s4) var(--s3); background: var(--tray); color: var(--on-tray); border-radius: 10px; }
+.tray-cols { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: var(--s3); font-family: var(--display); font-stretch: 105%; font-weight: 600; font-size: 0.92em; color: #A9CAC6; }
+#chain { width: 100%; height: auto; display: block; margin: var(--s3) auto 0; }
+#chain .node rect { fill: var(--paper); stroke: none; rx: 4px; }
+#chain .node text { font: 600 16px var(--sans); fill: var(--ink); }
+#chain .node .sub { font: 500 13px var(--sans); fill: var(--steel); }
+#chain .node.origin rect { fill: var(--amber); }
+#chain .node.origin text { font-family: var(--display); font-weight: 850; font-size: 19px; }
+#chain .node.origin .sub { font-family: var(--sans); font-weight: 600; font-size: 13px; fill: var(--ink); }
+#chain .node.flagged rect { fill: var(--red); }
+#chain .node.flagged text, #chain .node.flagged .sub { fill: #fff; }
+#chain .node.shared rect { stroke: var(--red-on-tray); stroke-width: 3px; }
+#chain .edge { fill: none; stroke: var(--tray-line); stroke-width: 1.4; opacity: 0.75; }
+#chain .edge.hot { stroke: var(--red-on-tray); stroke-width: 3; opacity: 1; }
+#chain .draw { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: draw 0.4s ease-out forwards; }
+#chain .appear { opacity: 0; animation: appear 0.25s ease-out forwards; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 @keyframes appear { to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { #chain .draw, #chain .appear { animation: none; stroke-dashoffset: 0; opacity: 1; } }
-.chain-desc { color: var(--ink-2); font-size: 0.92em; margin: var(--s3) 0 0; }
+.chain-desc { margin: var(--s3) 0 0; font-size: 0.95em; color: var(--on-tray); }
 
-/* Tables are records: ruled, left-aligned, numbers in mono. */
-.table-title, .view-title { font-size: 1.2em; margin: var(--s6) 0 var(--s3); }
-.view-title { margin-top: 0; }
-.table-scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; background: var(--sheet); border: 1px solid var(--rule); }
+/* Records */
+.section-title { margin: var(--s6) 0 var(--s2); font-family: var(--display); font-stretch: 112%; font-weight: 800; font-size: clamp(22px, 1.1rem + 0.8vw, 30px); line-height: 1.15; }
+.section-title.first { margin-top: 0; }
+.lede { margin: 0 0 var(--s4); color: var(--steel); max-width: 72ch; }
+.table-scroll { overflow-x: auto; margin-top: var(--s3); }
+table { width: 100%; border-collapse: collapse; background: var(--sheet); border: 1.5px solid var(--ink); }
 th, td { text-align: left; padding: var(--s2) var(--s3); border-bottom: 1px solid var(--rule); vertical-align: top; }
-th { font-weight: 600; font-size: 0.9em; color: var(--ink-2); border-bottom-color: var(--rule-strong); }
-td.num, td .code { font-family: var(--mono); font-size: 0.92em; }
-td.alert { color: var(--alert); font-weight: 500; }
-tr.short td:first-child { font-weight: 600; }
-.note { color: var(--ink-2); font-size: 0.92em; }
+th { font-family: var(--display); font-stretch: 100%; font-weight: 700; font-size: 0.9em; background: #E9EDEE; border-bottom: 1.5px solid var(--ink); }
+tbody tr:hover { background: #F2F6F5; }
+td.num { font-weight: 600; }
+td .code { display: block; color: var(--steel); font-size: 0.85em; font-weight: 400; }
+td.alert { color: var(--red); font-weight: 700; }
+tr.short td:first-child { font-weight: 700; }
+.note { color: var(--steel); font-size: 0.92em; }
 
-.cypher { margin-top: var(--s4); }
-.cypher summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 500; }
+.cypher { margin-top: var(--s3); }
+.cypher summary { cursor: pointer; min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; color: var(--teal); }
 .cypher pre {
-  margin: 0; padding: var(--s3) var(--s4); overflow-x: auto; background: var(--sheet);
-  border: 1px solid var(--rule); font: 13px/1.5 var(--mono); white-space: pre;
+  margin: 0; padding: var(--s3) var(--s4); overflow-x: auto; background: var(--tray); color: var(--on-tray);
+  border-radius: 8px; font: 13px/1.55 var(--mono); white-space: pre;
 }
 
-.colophon { border-top: 1px solid var(--rule-strong); color: var(--ink-2); font-size: 0.9em; padding: var(--s4) 0 var(--s5); }
-.colophon p { max-width: 90ch; }
-
-/* Agent view: question and answer on the left, the hospital's memory graph on the right. */
-.ask-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--s5); }
-textarea {
-  display: block; width: 100%; font: inherit; padding: var(--s2) var(--s3); border-radius: 2px;
-  background: var(--sheet); color: var(--ink); border: 1px solid var(--rule-strong); resize: vertical;
-}
+/* Agent */
+.ask-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--s5); align-items: start; }
 #hospital { display: block; width: 100%; max-width: none; }
-.ask .second { margin-top: var(--s4); }
-.examples { color: var(--ink-2); font-size: 0.92em; margin: var(--s3) 0; }
+.examples { margin: var(--s3) 0 var(--s4); }
+.examples p { margin: 0 0 var(--s1); color: var(--steel); font-size: 0.9em; }
 .example {
-  display: block; text-align: left; background: none; color: var(--ink); border: 0; padding: var(--s1) 0;
-  min-height: 32px; font-weight: 400; text-decoration: underline; text-underline-offset: 3px;
+  display: block; width: 100%; text-align: left; min-height: 40px; margin: 0 0 var(--s1); padding: var(--s2) var(--s3);
+  background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); font: 500 0.95em var(--sans);
 }
-.example:hover { background: none; color: var(--ink-2); }
-.mode { font-size: 0.88em; color: var(--ink-2); margin: var(--s4) 0 var(--s2); }
-.mode .code { font-family: var(--mono); }
-.answer { padding: var(--s3) var(--s4); background: var(--sheet); border: 1px solid var(--rule); white-space: pre-wrap; }
+.example:hover { background: var(--sheet); border-color: var(--teal); }
+.mode { font-size: 0.88em; color: var(--steel); margin: var(--s4) 0 var(--s2); }
+.mode .code { font-weight: 700; color: var(--teal); }
+.answer { padding: var(--s4); background: var(--sheet); border: 1.5px solid var(--ink); border-left: 6px solid var(--teal); white-space: pre-wrap; font-size: 1.04em; }
 .trace { padding-left: var(--s4); }
 .trace li { margin: var(--s2) 0; }
-.trace .tool { font-family: var(--mono); font-weight: 500; }
-.trace .args { font-family: var(--mono); font-size: 0.88em; color: var(--ink-2); }
-.trace pre { margin: var(--s1) 0 0; padding: var(--s2) var(--s3); background: var(--sheet); border: 1px solid var(--rule); font: 12px/1.5 var(--mono); overflow-x: auto; }
-.memory { border-left: 1px solid var(--rule); padding-left: var(--s4); }
-.memory h2 { font-size: 1.1em; margin: 0; }
-.memory h3 { font-size: 0.95em; margin: var(--s4) 0 var(--s2); }
+.trace .tool { font-family: var(--display); font-weight: 700; color: var(--teal); }
+.trace .args { color: var(--steel); font-size: 0.88em; overflow-wrap: anywhere; }
+.trace details pre { margin: var(--s1) 0 0; padding: var(--s2) var(--s3); background: var(--tray); color: var(--on-tray); border-radius: 6px; font: 12px/1.5 var(--mono); overflow-x: auto; }
+.trace summary { cursor: pointer; color: var(--teal); font-weight: 600; font-size: 0.9em; }
+.memory { background: var(--sheet); border: 1.5px solid var(--ink); border-radius: 8px; padding: var(--s4); }
+.memory h2 { margin: 0; font-family: var(--display); font-stretch: 105%; font-weight: 800; font-size: 1.15em; }
+.memory > p { margin: var(--s1) 0 0; color: var(--steel); font-size: 0.92em; }
 .plain { margin: 0; padding: 0; list-style: none; }
 .plain li { padding: var(--s1) 0; border-top: 1px solid var(--rule); font-size: 0.94em; }
-.plain .when { font-family: var(--mono); font-size: 0.85em; color: var(--ink-2); display: block; }
-.quiet { background: none; color: var(--ink); border: 1px solid var(--rule-strong); margin-top: var(--s4); font-weight: 500; }
-.quiet:hover { background: var(--sheet); }
-.alerts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--s3); }
-.alert-card { border: 1px solid var(--rule); background: var(--sheet); padding: var(--s3) var(--s4); }
-.alert-card.hit { border-color: var(--alert); }
-.alert-card h3 { font-size: 1em; margin: 0 0 var(--s2); }
-.alert-card p { margin: var(--s1) 0; font-size: 0.94em; }
-.alert-card .hitline { color: var(--alert); font-weight: 500; }
+.plain .when { display: block; color: var(--steel); font-size: 0.85em; }
+.quiet { min-height: 44px; margin-top: var(--s4); padding: 0 var(--s3); background: none; color: var(--ink); border: 1.5px solid var(--ink); font-family: var(--sans); font-weight: 600; font-size: 0.9em; }
+.quiet:hover { background: var(--paper); }
 
-/* Below 760px the comparison stacks; the graph answer comes first because it is the answer. */
+/* Hospital alerts: one card per tenant graph; a hit gets the red band. */
+.alerts { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--s3); }
+.alert-card { background: var(--sheet); border: 1.5px solid var(--ink); border-radius: 8px; overflow: hidden; }
+.alert-card h3 { margin: 0; padding: var(--s2) var(--s3); background: #E9EDEE; font-family: var(--display); font-weight: 700; font-size: 1em; }
+.alert-card.hit h3 { background: var(--red); color: #fff; }
+.alert-card p { margin: var(--s2) var(--s3); font-size: 0.94em; }
+.alert-card .hitline { font-weight: 600; }
+
+.colophon { background: var(--tray); color: #C5DCD9; font-size: 0.9em; padding: var(--s5) 0 var(--s6); }
+.colophon p { max-width: 90ch; }
+.colophon a { color: #fff; }
+
+/* Narrow screens: labels stack with the graph's answer first, the chain turns vertical. */
 @media (max-width: 760px) {
-  .compare { grid-template-columns: 1fr; gap: var(--s4); }
-  .side-graph { order: -1; }
+  .band-inner { padding-top: var(--s5); padding-bottom: var(--s4); }
+  .tabs { flex-wrap: wrap; overflow-x: visible; }
+  .tabs a { padding: 0 var(--s3); }
+  .compare { grid-template-columns: 1fr; }
+  .label-graph { order: -1; }
   .ask-layout { grid-template-columns: 1fr; }
-  .memory { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: var(--s4); }
-  .side-rag { border-right: 0; padding-right: 0; border-top: 1px solid var(--rule); padding-top: var(--s4); }
-  .chain-fig figcaption { display: none; }
-  .tabs { gap: 0 var(--s4); flex-wrap: wrap; overflow-x: visible; }
+  .tray { padding: var(--s3); }
+  .tray-cols { display: none; }
   main.wrap { padding-top: var(--s4); }
 }

@@ -19,8 +19,15 @@ function el(tag, attrs = {}, text) {
   return n;
 }
 
+// Tall Man lettering for look-alike names, as pharmacies print them; everything else in title case.
+const TALL_MAN = {
+  CISPLATIN: "CISplatin", CARBOPLATIN: "CARBOplatin", HYDROMORPHONE: "HYDROmorphone", CLONAZEPAM: "clonazePAM",
+  LORAZEPAM: "LORazepam", ALPRAZOLAM: "ALPRAZolam", DOPAMINE: "DOPamine", DOBUTAMINE: "DOBUTamine", TRAMADOL: "traMADol",
+};
+
 function title(name) {
-  return name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  return name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/\b[A-Za-z]+\b/g, (w) => TALL_MAN[w.toUpperCase()] || w);
 }
 
 function setState(node, text, isError = false) {
@@ -117,8 +124,10 @@ async function check(drug) {
 function renderCompare(drug, trap, rag, safe) {
   const list = $("#rag-list");
   list.innerHTML = "";
-  if (!rag.rows.length) list.append(el("li", {}, "No label text to compare for this drug."));
-  rag.rows.forEach((r) => {
+  const top = rag.rows[0];
+  $("#rag-top").textContent = top ? title(top.substitute) : "No label text to compare";
+  $("#rag-sub").textContent = top ? `Closest label text to ${title(drug)} (distance ${top.score.toFixed(3)}). The next closest:` : "";
+  rag.rows.slice(1).forEach((r) => {
     const li = el("li");
     li.append(el("span", { class: "name" }, title(r.substitute)), el("span", { class: "score" }, `distance ${r.score.toFixed(3)}`));
     list.append(li);
@@ -134,10 +143,12 @@ function renderCompare(drug, trap, rag, safe) {
     v.append(el("p", { class: "head" }, "No similar-text pick to check."));
   } else if (shared.length) {
     v.className = "trap";
-    v.append(el("p", { class: "head" }, `Same plant: ${title(pick)} and ${title(drug)} share ${shared.length} manufacturing plant${shared.length > 1 ? "s" : ""}.`));
+    v.append(el("p", { class: "kicker" }, "Boxed warning"),
+      el("p", { class: "head" }, `${title(pick)} comes out of ${shared.length} of the same plant${shared.length > 1 ? "s" : ""} as ${title(drug)}.`));
     shared.forEach((p) => {
-      const flag = p.flags.length ? ` Under ${p.flags.join(", ")}.` : "";
-      v.append(el("p", {}, `${p.plant} (${p.country}, FEI ${p.fei}).${flag}`));
+      const line = el("p", { class: "plant" }, `${p.plant}, ${p.country}, FEI ${p.fei}`);
+      p.flags.forEach((f) => line.append(el("span", { class: "stamp" }, f.replace("FDA Import Alert 66-40 ", "Import alert 66-40, "))));
+      v.append(line);
     });
     v.append(el("p", {}, `If ${shared.length > 1 ? "one of these plants" : "that plant"} is why the drug is short, the substitute is exposed too.`));
   } else if (row) {
@@ -157,10 +168,10 @@ function renderCompare(drug, trap, rag, safe) {
   }
   safe.rows.slice(0, 6).forEach((r) => {
     const li = el("li");
-    const facts = [`${r.labels} US label${r.labels === 1 ? "" : "s"}`];
-    if (r.short_now) facts.push(`${r.short_now} on the shortage list`);
-    if (r.flagged_plants) facts.push(`${r.flagged_plants} plant under import alert`);
-    li.append(el("span", { class: "name" }, title(r.substitute)), el("span", { class: "facts" }, facts.join(" · ")));
+    const facts = el("span", { class: "facts" }, `${r.labels} US label${r.labels === 1 ? "" : "s"}`);
+    if (r.flagged_plants) facts.append(`, ${r.flagged_plants} plant under import alert`);
+    if (r.short_now) facts.append(" ", el("span", { class: "tag" }, "On the shortage list"));
+    li.append(el("span", { class: "name" }, title(r.substitute)), facts);
     ul.append(li);
   });
 }
@@ -237,7 +248,7 @@ function renderChain(drug, trap, ragPick) {
     Object.entries({ x: p.x, y: p.y, width: nodeW, height: nodeH }).forEach(([k, v]) => r.setAttribute(k, v));
     const t = document.createElementNS(NS, "text");
     t.setAttribute("x", p.x + 12); t.setAttribute("y", p.y + 22);
-    const max = narrow ? 22 : 26;
+    const max = (narrow ? 22 : 26) - (label === label.toUpperCase() ? 4 : 0);
     t.textContent = label.length > max ? `${label.slice(0, max - 1)}…` : label;
     const s = document.createElementNS(NS, "text");
     s.setAttribute("x", p.x + 12); s.setAttribute("y", p.y + 41); s.setAttribute("class", "sub");
@@ -251,10 +262,10 @@ function renderChain(drug, trap, ragPick) {
   trap.rows.forEach((r) => r.shared_plants.forEach((sp) => {
     if (pos.has(`p:${sp.fei}`)) edge(`p:${sp.fei}`, `s:${r.substitute}`, r.substitute === ragPick && hotFei.has(sp.fei), 330);
   }));
-  node("origin", title(drug), SHORT.has(drug) ? "on the FDA shortage list" : "not short today", "origin", 0);
+  node("origin", title(drug), SHORT.has(drug) ? "On the FDA shortage list" : "Not short today", "origin", 0);
   plants.forEach((p) => {
     const flagged = p.import_alert_dates.length;
-    node(`p:${p.fei}`, p.plant, flagged ? `Import alert ${p.import_alert_dates[0]}` : `FEI ${p.fei || "n/a"} · ${p.country}`,
+    node(`p:${p.fei}`, p.plant, flagged ? `Import alert ${p.import_alert_dates[0]}` : `FEI ${p.fei || "n/a"}, ${p.country}`,
       flagged ? "flagged" : (hotFei.has(p.fei) ? "shared" : ""), 260);
   });
   subs.forEach((s) => {
