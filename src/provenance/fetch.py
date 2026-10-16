@@ -28,7 +28,7 @@ class Fetcher:
         self._pace_lock = asyncio.Lock()
         self._last = 0.0
         self._client = httpx.AsyncClient(
-            timeout=60, follow_redirects=True, headers={"User-Agent": "single-source/0.1 (hackathon research)"}
+            timeout=60, follow_redirects=True, headers={"User-Agent": "provenance/0.1 (hackathon research)"}
         )
 
     async def __aenter__(self) -> "Fetcher":
@@ -52,7 +52,7 @@ class Fetcher:
             data = path.read_bytes()
             return None if data == b"__404__" else data
         if settings.mode != "live":
-            raise MissingFixture(f"No fixture for {url} {params or ''}. Run with SS_MODE=live once to record it.")
+            raise MissingFixture(f"No fixture for {url} {params or ''}. Run with PV_MODE=live once to record it.")
         for attempt in range(8):
             async with self._sem:
                 if "dailymed" in url:

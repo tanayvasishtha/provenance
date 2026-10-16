@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=ROOT / ".env", env_prefix="SS_", extra="ignore")
+    model_config = SettingsConfigDict(env_file=ROOT / ".env", env_prefix="PV_", extra="ignore")
 
     falkordb_host: str = "localhost"
     falkordb_port: int = 6379

@@ -14,15 +14,15 @@
    "similarity": 0.107,
    "shared_plants": [
     {
-     "plant": "EUGIA PHARMA SPECIALITIES LIMITED",
-     "fei": "3008461619",
-     "country": "IND",
-     "flagged": false
-    },
-    {
      "plant": "Fresenius Kabi USA, LLC",
      "fei": "1450022",
      "country": "USA",
+     "flagged": false
+    },
+    {
+     "plant": "EUGIA PHARMA SPECIALITIES LIMITED",
+     "fei": "3008461619",
+     "country": "IND",
      "flagged": false
     }
    ],
@@ -78,9 +78,9 @@
    "rag_sub_also_short": false,
    "trap": true,
    "graph_independent_options": [
+    "ALPRAZOLAM",
     "CHLORDIAZEPOXIDE HYDROCHLORIDE",
-    "MIDAZOLAM HYDROCHLORIDE",
-    "ALPRAZOLAM"
+    "MIDAZOLAM HYDROCHLORIDE"
    ],
    "graph_candidates": 7
   },
@@ -90,15 +90,9 @@
    "similarity": 0.1619,
    "shared_plants": [
     {
-     "plant": "GLAND PHARMA LIMITED",
-     "fei": "3002647489",
+     "plant": "Pfizer Healthcare India Private Limited",
+     "fei": "3008316085",
      "country": "IND",
-     "flagged": false
-    },
-    {
-     "plant": "Hospira, Inc.",
-     "fei": "1925262",
-     "country": "USA",
      "flagged": false
     },
     {
@@ -114,8 +108,8 @@
      "flagged": false
     },
     {
-     "plant": "Pfizer Healthcare India Private Limited",
-     "fei": "3008316085",
+     "plant": "GLAND PHARMA LIMITED",
+     "fei": "3002647489",
      "country": "IND",
      "flagged": false
     },
@@ -124,17 +118,23 @@
      "fei": "3009864167",
      "country": "IND",
      "flagged": false
+    },
+    {
+     "plant": "Hospira, Inc.",
+     "fei": "1925262",
+     "country": "USA",
+     "flagged": false
     }
    ],
    "rag_sub_also_short": true,
    "trap": true,
    "graph_independent_options": [
     "GUANFACINE",
-    "TIZANIDINE HYDROCHLORIDE",
     "METHYLDOPA",
-    "GUANFACINE HYDROCHLORIDE",
+    "TIZANIDINE HYDROCHLORIDE",
+    "CLONIDINE HYDROCHLORIDE",
     "CLONIDINE",
-    "CLONIDINE HYDROCHLORIDE"
+    "GUANFACINE HYDROCHLORIDE"
    ],
    "graph_candidates": 7
   },
@@ -177,8 +177,8 @@
    "rag_sub_also_short": false,
    "trap": true,
    "graph_independent_options": [
-    "ETHACRYNATE SODIUM",
-    "ETHACRYNIC ACID"
+    "ETHACRYNIC ACID",
+    "ETHACRYNATE SODIUM"
    ],
    "graph_candidates": 4
   },
@@ -209,9 +209,9 @@
    "rag_sub_also_short": false,
    "trap": true,
    "graph_independent_options": [
+    "IBUPROFEN",
     "DICLOFENAC SODIUM",
     "NAPROXEN SODIUM",
-    "IBUPROFEN",
     "CELECOXIB",
     "IBUPROFEN LYSINE"
    ],
@@ -223,15 +223,15 @@
    "similarity": 0.2079,
    "shared_plants": [
     {
-     "plant": "Fresenius Kabi USA, LLC",
-     "fei": "1450022",
-     "country": "USA",
-     "flagged": false
-    },
-    {
      "plant": "EUGIA PHARMA SPECIALITIES LIMITED",
      "fei": "3008461619",
      "country": "IND",
+     "flagged": false
+    },
+    {
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "1450022",
+     "country": "USA",
      "flagged": false
     }
    ],
@@ -255,25 +255,25 @@
      "flagged": false
     },
     {
-     "plant": "Fresenius Kabi USA, LLC",
-     "fei": "1450022",
-     "country": "USA",
-     "flagged": false
-    },
-    {
      "plant": "Fresenius Kabi Austria",
      "fei": "3003708554",
      "country": "AUT",
+     "flagged": false
+    },
+    {
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "1450022",
+     "country": "USA",
      "flagged": false
     }
    ],
    "rag_sub_also_short": true,
    "trap": true,
    "graph_independent_options": [
-    "PRILOCAINE HYDROCHLORIDE",
-    "FLECAINIDE ACETATE",
     "PROPAFENONE HYDROCHLORIDE",
     "SOTALOL HYDROCHLORIDE",
+    "FLECAINIDE ACETATE",
+    "PRILOCAINE HYDROCHLORIDE",
     "MEXILETINE HYDROCHLORIDE"
    ],
    "graph_candidates": 10
@@ -312,8 +312,8 @@
    "rag_sub_also_short": false,
    "trap": false,
    "graph_independent_options": [
-    "CHLORDIAZEPOXIDE HYDROCHLORIDE",
-    "TEMAZEPAM"
+    "TEMAZEPAM",
+    "CHLORDIAZEPOXIDE HYDROCHLORIDE"
    ],
    "graph_candidates": 7
   },
@@ -323,14 +323,14 @@
    "similarity": 0.1666,
    "shared_plants": [
     {
-     "plant": "Ohm Laboratories Inc.",
-     "fei": "3004132058",
+     "plant": "Novel Laboratories, Inc.",
+     "fei": "3006271438",
      "country": "USA",
      "flagged": false
     },
     {
-     "plant": "Novel Laboratories, Inc.",
-     "fei": "3006271438",
+     "plant": "Ascent Pharmaceuticals Inc",
+     "fei": "3009518416",
      "country": "USA",
      "flagged": false
     },
@@ -347,8 +347,8 @@
      "flagged": false
     },
     {
-     "plant": "Ascent Pharmaceuticals Inc",
-     "fei": "3009518416",
+     "plant": "Ohm Laboratories Inc.",
+     "fei": "3004132058",
      "country": "USA",
      "flagged": false
     }
@@ -367,9 +367,9 @@
    "similarity": 0.1619,
    "shared_plants": [
     {
-     "plant": "Hospira, Inc.",
-     "fei": "1021343",
-     "country": "USA",
+     "plant": "GLAND PHARMA LIMITED",
+     "fei": "3009864167",
+     "country": "IND",
      "flagged": false
     },
     {
@@ -379,14 +379,14 @@
      "flagged": false
     },
     {
-     "plant": "GLAND PHARMA LIMITED",
-     "fei": "3009864167",
-     "country": "IND",
+     "plant": "Hospira, Inc.",
+     "fei": "1021343",
+     "country": "USA",
      "flagged": false
     },
     {
-     "plant": "Fresenius Kabi USA, LLC",
-     "fei": "3001833549",
+     "plant": "Hospira, Inc.",
+     "fei": "1925262",
      "country": "USA",
      "flagged": false
     },
@@ -397,8 +397,8 @@
      "flagged": false
     },
     {
-     "plant": "Hospira, Inc.",
-     "fei": "1925262",
+     "plant": "Fresenius Kabi USA, LLC",
+     "fei": "3001833549",
      "country": "USA",
      "flagged": false
     }
@@ -406,8 +406,8 @@
    "rag_sub_also_short": true,
    "trap": true,
    "graph_independent_options": [
-    "TEMAZEPAM",
     "CHLORDIAZEPOXIDE HYDROCHLORIDE",
+    "TEMAZEPAM",
     "CLONAZEPAM",
     "CLOBAZAM"
    ],
@@ -438,14 +438,14 @@
    "similarity": 0.1852,
    "shared_plants": [
     {
-     "plant": "EUGIA PHARMA SPECIALITIES LIMITED",
-     "fei": "3008461619",
+     "plant": "GLAND PHARMA LIMITED",
+     "fei": "3002647489",
      "country": "IND",
      "flagged": false
     },
     {
-     "plant": "GLAND PHARMA LIMITED",
-     "fei": "3002647489",
+     "plant": "EUGIA PHARMA SPECIALITIES LIMITED",
+     "fei": "3008461619",
      "country": "IND",
      "flagged": false
     }
@@ -476,8 +476,8 @@
    "rag_sub_also_short": true,
    "trap": true,
    "graph_independent_options": [
-    "PRILOCAINE HYDROCHLORIDE",
-    "LIDOCAINE"
+    "LIDOCAINE",
+    "PRILOCAINE HYDROCHLORIDE"
    ],
    "graph_candidates": 5
   }

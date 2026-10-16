@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance</title>
+<meta name="description" content="Checks whether the substitute for a drug in shortage is made in the same plant.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <div class="wrap">
+    <h1>Provenance</h1>
+    <p class="purpose">When a drug runs short, check whether its substitute comes out of the same plant.</p>
+    <p class="freshness" id="freshness">Reading the graph...</p>
+  </div>
+  <nav class="wrap tabs" aria-label="Views">
+    <a href="#check" data-view="check" aria-current="page">Check a substitute</a>
+    <a href="#plant" data-view="plant">If a plant stops</a>
+    <a href="#risk" data-view="risk">Where the risk sits</a>
+  </nav>
+</header>
+
+<main id="main" class="wrap">
+
+  <section id="view-check" data-view-panel="check">
+    <form class="ask" id="check-form">
+      <label for="drug">Drug to check</label>
+      <div class="ask-row">
+        <select id="drug" name="drug" required><option value="">Loading the shortage list...</option></select>
+        <button type="submit">Check substitutes</button>
+      </div>
+    </form>
+
+    <div id="check-state" class="state" role="status" aria-live="polite">Pick a drug from the FDA shortage list to check its substitutes.</div>
+
+    <div id="check-result" hidden>
+      <div class="compare">
+        <article class="side side-rag">
+          <h2>Similar-text pick</h2>
+          <p class="method">What a search over label text suggests: the substitute whose label reads most like this one.</p>
+          <ol id="rag-list" class="picks"></ol>
+        </article>
+        <article class="side side-graph">
+          <h2>Supply graph</h2>
+          <p class="method">The same pick, checked against the plants that make both drugs.</p>
+          <div id="verdict"></div>
+          <h3>No shared manufacturing plant</h3>
+          <ul id="safe-list" class="safe"></ul>
+        </article>
+      </div>
+
+      <figure class="chain-fig">
+        <figcaption>
+          <span>Drug checked</span><span>Plants that make it</span><span>Substitutes those plants also make</span>
+        </figcaption>
+        <svg id="chain" role="img" aria-labelledby="chain-desc"></svg>
+        <p id="chain-desc" class="chain-desc"></p>
+      </figure>
+
+      <h2 class="table-title">Evidence</h2>
+      <div class="table-scroll">
+        <table id="evidence">
+          <thead><tr><th scope="col">Plant</th><th scope="col">FEI</th><th scope="col">Country</th><th scope="col">Labels of this drug</th><th scope="col">Also makes</th><th scope="col">FDA import alert 66-40</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <details class="cypher"><summary>Show the Cypher</summary><pre id="check-cypher"></pre></details>
+    </div>
+  </section>
+
+  <section id="view-plant" data-view-panel="plant" hidden>
+    <form class="ask" id="plant-form">
+      <label for="plant">Plant (FDA FEI number)</label>
+      <div class="ask-row">
+        <select id="plant" name="plant" required><option value="">Loading plants...</option></select>
+        <button type="submit">Show what stops</button>
+      </div>
+    </form>
+    <div id="plant-state" class="state" role="status" aria-live="polite">Pick a plant to see every drug that depends on it.</div>
+    <div id="plant-result" hidden>
+      <div class="table-scroll">
+        <table id="plant-table">
+          <thead><tr><th scope="col">Drug</th><th scope="col">Share of US labels made here</th><th scope="col">Labels made here</th><th scope="col">All US labels</th><th scope="col">On the shortage list now</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="note">Share counts labels, not volume. FDA does not publish how much each plant ships.</p>
+      <details class="cypher"><summary>Show the Cypher</summary><pre id="plant-cypher"></pre></details>
+    </div>
+  </section>
+
+  <section id="view-risk" data-view-panel="risk" hidden>
+    <h2 class="view-title">Plants that carry the most of today's shortage drugs</h2>
+    <p class="method">For each drug on the shortage list, the share of its US labels each plant makes, summed per plant. Read it as "where a supplier review should start".</p>
+    <div id="risk-state" class="state" role="status" aria-live="polite">Ranking plants...</div>
+    <div class="table-scroll">
+      <table id="risk-table" hidden>
+        <thead><tr><th scope="col">Exposure</th><th scope="col">Plant</th><th scope="col">Country</th><th scope="col">Drugs it carries</th><th scope="col">FDA import alert 66-40</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <details class="cypher"><summary>Show the Cypher</summary><pre id="risk-cypher"></pre></details>
+  </section>
+
+</main>
+
+<footer class="colophon">
+  <div class="wrap">
+    <p>Sources: <a href="https://open.fda.gov/apis/drug/drugshortages/">openFDA drug shortages</a>, <a href="https://open.fda.gov/apis/drug/ndc/">openFDA NDC directory</a>, <a href="https://dailymed.nlm.nih.gov/dailymed/">DailyMed label establishments</a>, <a href="https://www.fda.gov/drugs/drug-approvals-and-databases/drug-establishments-current-registration-site">FDA establishment registry</a>, <a href="https://www.accessdata.fda.gov/cms_ia/importalert_189.html">FDA Import Alert 66-40</a>. Graph in FalkorDB.</p>
+    <p>"Same class" means the same FDA pharmacologic class, not proof two drugs are interchangeable. A pharmacist decides. Not medical advice.</p>
+  </div>
+</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>

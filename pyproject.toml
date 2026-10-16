@@ -1,7 +1,7 @@
 [project]
-name = "single-source"
+name = "provenance"
 version = "0.1.0"
-description = "Add your description here"
+description = "Trace a drug in shortage and its substitutes to the plants that make them, in FalkorDB."
 readme = "README.md"
 authors = [
     { name = "Tanay Vasishtha", email = "tanayvasishtha@gmail.com" }
@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
-single-source = "single_source:main"
+provenance = "provenance:main"
 
 [build-system]
 requires = ["uv_build>=0.11.16,<0.12.0"]

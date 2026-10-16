@@ -12,7 +12,7 @@ log = logging.getLogger("build")
 
 ALWAYS = {"CISPLATIN", "CARBOPLATIN", "OXALIPLATIN"}
 TOP_N = 20
-MAX_CLASS_MEMBERS = 8
+MAX_CLAPV_MEMBERS = 8
 SNAPSHOT = ROOT / "data" / "snapshot.json"
 
 
@@ -27,7 +27,7 @@ async def build() -> dict:
         prod_lists = [_single(pl) for pl in await asyncio.gather(*(sources.products_for(f, s) for s in scope))]
         classes = sorted({c for pl in prod_lists for p in pl for c in p.get("pharm_class", []) if c.endswith("[EPC]")})
         members = await asyncio.gather(*(sources.class_members(f, c) for c in classes))
-        substitutes = sorted({m for ms in members for m in ms[:MAX_CLASS_MEMBERS]} - set(scope))
+        substitutes = sorted({m for ms in members for m in ms[:MAX_CLAPV_MEMBERS]} - set(scope))
         log.info("EPC classes %d, substitute substances %d", len(classes), len(substitutes))
 
         prod_lists += [_single(pl) for pl in await asyncio.gather(*(sources.products_for(f, s) for s in substitutes))]

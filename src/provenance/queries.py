@@ -40,7 +40,7 @@ WITH f, collect({ingredient: i.name, share: round(100.0 * n / total)}) AS deps,
      sum(toFloat(n) / total) AS exposure
 OPTIONAL MATCH (f)-[:FLAGGED]->(a:Action)
 RETURN f.name AS plant, f.fei AS fei, f.country AS country, round(100 * exposure) / 100 AS exposure,
-       size(deps) AS ingredients, deps[0..6] AS top, collect(DISTINCT a.date) AS import_alert_dates
+       size(deps) AS ingredients, deps AS top, collect(DISTINCT a.date) AS import_alert_dates
 ORDER BY exposure DESC
 LIMIT $limit
 """
@@ -61,6 +61,16 @@ ORDER BY short_now, flagged_plants, labels DESC
 """
 
 
+# Every plant that manufactures the drug, with any FDA action against it.
+DRUG_PLANTS = """
+MATCH (i:Ingredient {name: $drug})<-[:CONTAINS]-(p:Product)<-[:MAKES]-(f:Facility)
+OPTIONAL MATCH (f)-[:FLAGGED]->(a:Action)
+RETURN f.name AS plant, f.fei AS fei, f.country AS country, count(DISTINCT p) AS products,
+       collect(DISTINCT a.date) AS import_alert_dates
+ORDER BY products DESC, plant
+"""
+
+
 def run(cypher: str, **params) -> list[dict]:
     res = graph().ro_query(cypher, params)
     cols = [h[1] if isinstance(h, (list, tuple)) else h for h in res.header]
@@ -77,6 +87,10 @@ def plant_down(fei: str) -> list[dict]:
 
 def chokepoints(limit: int = 15) -> list[dict]:
     return run(CHOKEPOINTS, limit=limit)
+
+
+def drug_plants(drug: str) -> list[dict]:
+    return run(DRUG_PLANTS, drug=drug.upper())
 
 
 def safe(drug: str) -> list[dict]:

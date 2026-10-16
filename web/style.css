@@ -1,0 +1,139 @@
+/* Direction: DESIGN.md. Printed public record: paper, ink, one vermilion for "same plant". */
+:root {
+  --paper: #FBFAF7;
+  --sheet: #FFFFFF;
+  --ink: #1B1F24;
+  --ink-2: #4A5560;
+  --rule: #D9D6CF;
+  --rule-strong: #8A8F94;
+  --alert: #B3261E;
+  --alert-tint: #FBEDEC;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 20px; --s5: 32px; --s6: 52px;
+  --sans: "Public Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 clamp(15px, 0.9rem + 0.15vw, 17px)/1.55 var(--sans);
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--s4); }
+
+a { color: var(--ink); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: var(--s3); top: var(--s3); background: var(--sheet); padding: var(--s2) var(--s3); z-index: 2; }
+
+/* Masthead reads like the head of a notice: name, purpose, provenance. */
+.masthead { border-bottom: 1px solid var(--rule-strong); padding-top: var(--s5); }
+.masthead h1 { font-size: clamp(28px, 1.4rem + 1.4vw, 40px); font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+.purpose { margin: var(--s1) 0 0; font-size: 1.1em; max-width: 46ch; }
+.freshness { margin: var(--s3) 0 0; color: var(--ink-2); font-size: 0.9em; }
+.freshness .code { font-family: var(--mono); }
+
+.tabs { display: flex; gap: var(--s5); margin-top: var(--s4); overflow-x: auto; }
+.tabs a {
+  display: inline-block; padding: var(--s3) 0; min-height: 44px;
+  text-decoration: none; color: var(--ink-2); font-weight: 500; white-space: nowrap;
+  border-bottom: 3px solid transparent;
+}
+.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
+.tabs a:hover { color: var(--ink); }
+
+main.wrap { padding-top: var(--s5); padding-bottom: var(--s6); }
+
+/* The question form */
+.ask label { display: block; font-weight: 600; margin-bottom: var(--s2); }
+.ask-row { display: flex; gap: var(--s3); flex-wrap: wrap; }
+select, button { font: inherit; min-height: 44px; border-radius: 2px; }
+select {
+  flex: 1 1 320px; max-width: 520px; padding: 0 var(--s3);
+  background: var(--sheet); color: var(--ink); border: 1px solid var(--rule-strong);
+}
+button {
+  padding: 0 var(--s4); background: var(--ink); color: var(--paper);
+  border: 1px solid var(--ink); font-weight: 600; cursor: pointer;
+}
+button:hover { background: #33393F; }
+button:disabled { opacity: 0.6; cursor: progress; }
+
+.state { margin: var(--s4) 0; color: var(--ink-2); }
+.state.error { color: var(--alert); font-weight: 500; }
+
+/* Comparison: two different jobs, so two different weights. The graph side is the answer. */
+.compare { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--s5); margin-top: var(--s5); }
+.side h2 { font-size: 1.2em; margin: 0; }
+.method { color: var(--ink-2); margin: var(--s1) 0 var(--s3); max-width: 60ch; }
+.side-rag { padding-right: var(--s5); border-right: 1px solid var(--rule); }
+.picks { margin: 0; padding-left: var(--s4); }
+.picks li { padding: var(--s1) 0; }
+.picks .name { font-weight: 600; }
+.picks .score { font-family: var(--mono); color: var(--ink-2); font-size: 0.9em; margin-left: var(--s2); }
+
+#verdict { padding: var(--s3) var(--s4); border: 1px solid var(--rule); background: var(--sheet); }
+#verdict.trap { border-color: var(--alert); background: var(--alert-tint); }
+#verdict .head { font-weight: 700; margin: 0 0 var(--s1); }
+#verdict.trap .head { color: var(--alert); }
+#verdict p { margin: var(--s1) 0 0; }
+.side-graph h3 { font-size: 1em; margin: var(--s4) 0 var(--s2); }
+.safe { list-style: none; margin: 0; padding: 0; }
+.safe li { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); padding: var(--s2) 0; border-top: 1px solid var(--rule); }
+.safe .name { font-weight: 600; flex: 1 1 200px; }
+.safe .facts { color: var(--ink-2); font-size: 0.92em; }
+.safe .none { color: var(--ink-2); }
+
+/* The chain: the product's motif. Three columns, drawn in traversal order. */
+.chain-fig { margin: var(--s6) 0 0; padding: var(--s4) 0 0; border-top: 1px solid var(--rule-strong); }
+.chain-fig figcaption { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: var(--s3); color: var(--ink-2); font-size: 0.9em; font-weight: 500; }
+#chain { width: 100%; height: auto; display: block; margin-top: var(--s3); }
+#chain .node rect { fill: var(--sheet); stroke: var(--rule-strong); stroke-width: 1; }
+#chain .node.origin rect { fill: var(--ink); stroke: var(--ink); }
+#chain .node.origin text { fill: var(--paper); font-weight: 700; }
+#chain .node text { font: 500 16px var(--sans); fill: var(--ink); }
+#chain .node .sub { font: 400 13px var(--mono); fill: var(--ink-2); }
+#chain .node.flagged rect, #chain .node.shared rect { stroke: var(--alert); stroke-width: 2; }
+#chain .node.flagged .sub { fill: var(--alert); }
+#chain .edge { fill: none; stroke: var(--rule-strong); stroke-width: 1.25; }
+#chain .edge.hot { stroke: var(--alert); stroke-width: 2.5; }
+#chain .draw { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: draw 0.35s ease-out forwards; }
+#chain .appear { opacity: 0; animation: appear 0.2s ease-out forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes appear { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { #chain .draw, #chain .appear { animation: none; stroke-dashoffset: 0; opacity: 1; } }
+.chain-desc { color: var(--ink-2); font-size: 0.92em; margin: var(--s3) 0 0; }
+
+/* Tables are records: ruled, left-aligned, numbers in mono. */
+.table-title, .view-title { font-size: 1.2em; margin: var(--s6) 0 var(--s3); }
+.view-title { margin-top: 0; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; background: var(--sheet); border: 1px solid var(--rule); }
+th, td { text-align: left; padding: var(--s2) var(--s3); border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; font-size: 0.9em; color: var(--ink-2); border-bottom-color: var(--rule-strong); }
+td.num, td .code { font-family: var(--mono); font-size: 0.92em; }
+td.alert { color: var(--alert); font-weight: 500; }
+tr.short td:first-child { font-weight: 600; }
+.note { color: var(--ink-2); font-size: 0.92em; }
+
+.cypher { margin-top: var(--s4); }
+.cypher summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 500; }
+.cypher pre {
+  margin: 0; padding: var(--s3) var(--s4); overflow-x: auto; background: var(--sheet);
+  border: 1px solid var(--rule); font: 13px/1.5 var(--mono); white-space: pre;
+}
+
+.colophon { border-top: 1px solid var(--rule-strong); color: var(--ink-2); font-size: 0.9em; padding: var(--s4) 0 var(--s5); }
+.colophon p { max-width: 90ch; }
+
+/* Below 760px the comparison stacks; the graph answer comes first because it is the answer. */
+@media (max-width: 760px) {
+  .compare { grid-template-columns: 1fr; gap: var(--s4); }
+  .side-graph { order: -1; }
+  .side-rag { border-right: 0; padding-right: 0; border-top: 1px solid var(--rule); padding-top: var(--s4); }
+  .chain-fig figcaption { display: none; }
+  .tabs { gap: var(--s4); }
+  main.wrap { padding-top: var(--s4); }
+}

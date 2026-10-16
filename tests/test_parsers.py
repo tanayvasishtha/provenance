@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 
-from single_source import graph, sources
+from provenance import graph, sources
 
 DATA = Path(__file__).parent / "data"
 
