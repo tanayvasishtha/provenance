@@ -157,6 +157,15 @@ def ask(question: str, hospital: str | None = None) -> dict:
         return {"mode": "live", "answer": "Stopped after too many steps without an answer.", "trace": trace}
     except LookupError:
         return graph_only(question, hospital)
+    except Exception as e:  # noqa: BLE001  any model failure: answer from the graph instead of returning a 500
+        import anthropic
+
+        if not isinstance(e, anthropic.APIError):
+            raise
+        log.warning("model call failed (%s); answering in graph-only mode", type(e).__name__)
+        out = graph_only(question, hospital)
+        out["note"] = f"The model call failed ({type(e).__name__}), so this answer came from the graph-only planner."
+        return out
 
 
 def _count(out) -> int:

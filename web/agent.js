@@ -67,6 +67,7 @@ $("#ask-form").addEventListener("submit", async (ev) => {
     $("#ask-mode").innerHTML = "";
     $("#ask-mode").append(el("span", { class: "code" }, `mode: ${r.mode}`), ` ${MODE_TEXT[r.mode] || ""}`);
     $("#ask-answer").textContent = r.answer;
+    if (r.note) $("#ask-mode").append(el("span", {}, ` ${r.note}`));
     const ol = $("#ask-trace");
     ol.innerHTML = "";
     if (!r.trace.length) ol.append(el("li", {}, "No graph query was needed for this answer."));
