@@ -34,5 +34,5 @@ def main() -> None:
     except redis.exceptions.ConnectionError as e:
         raise SystemExit(
             f"FalkorDB is not reachable ({e}). Start it with scripts/falkordb-wsl.sh "
-            "or `docker run -p 6379:6379 falkordb/falkordb:v6.0.1`."
+            "or `docker run -p 6379:6379 falkordb/falkordb:v4.22.1`."
         ) from None

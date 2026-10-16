@@ -1,11 +1,12 @@
 name: ci
 on: [push, pull_request]
 jobs:
-  test:
+  # FalkorDB 4.22.1 is the current falkordb/falkordb Docker image.
+  falkordb-4:
     runs-on: ubuntu-latest
     services:
       falkordb:
-        image: falkordb/falkordb:v6.0.1
+        image: falkordb/falkordb:v4.22.1
         ports: ["6379:6379"]
     steps:
       - uses: actions/checkout@v4
@@ -15,5 +16,18 @@ jobs:
       - run: uv sync --frozen
       - run: uv run ruff check src tests
       - run: uv run pytest -q
-        env:
-          PV_MODE: replay
+
+  # FalkorDB 6.0.1 (the Rust engine) ships as a module, so install it the same way the Dockerfile does.
+  falkordb-6:
+    runs-on: ubuntu-latest
+    container: python:3.11-slim-trixie
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          apt-get update && apt-get install -y --no-install-recommends redis-server libgomp1 curl ca-certificates
+          curl -fsSLo /tmp/falkordb.so https://github.com/FalkorDB/FalkorDB/releases/download/v6.0.1/falkordb-x64.so
+          echo "155b2fedd99422adfa7f2541cd0d9becabc05839cf5319ed8d604341cdae445d  /tmp/falkordb.so" | sha256sum -c -
+          chmod +x /tmp/falkordb.so
+          redis-server --loadmodule /tmp/falkordb.so --daemonize yes
+          sleep 1 && redis-cli MODULE LIST
+      - run: pip install uv && uv sync --frozen && uv run pytest -q
