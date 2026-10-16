@@ -2,6 +2,7 @@
 
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -94,8 +95,11 @@ def _other_drug(rows: list[dict], drug: str) -> list[dict]:
 
 @app.get("/api/trap")
 def trap(drug: str) -> dict:
-    return {**_answer(queries.TRAP, _other_drug(queries.trap(drug), drug)),
-            "plants": queries.drug_plants(drug), "plants_cypher": queries.DRUG_PLANTS.strip()}
+    # Both queries leave at once: the database can be a continent away from the web server.
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        rows, plants = pool.submit(queries.trap, drug), pool.submit(queries.drug_plants, drug)
+    return {**_answer(queries.TRAP, _other_drug(rows.result(), drug)),
+            "plants": plants.result(), "plants_cypher": queries.DRUG_PLANTS.strip()}
 
 
 @app.get("/api/safe")

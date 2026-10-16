@@ -245,12 +245,15 @@ def graph_only(question: str, hospital: str | None) -> dict:
     if not drug:
         hint = "Name a drug from the shortage list or a plant FEI number, and I will trace it."
         return {"mode": "graph-only", "answer": hint, "trace": trace}
-    # The three lookups are independent, so they run at once; the trace keeps their logical order.
-    with ThreadPoolExecutor(max_workers=3) as pool:
-        jobs = {n: pool.submit(run_tool, n, {"drug": drug}) for n in ("plants_for_drug", "substitute_trap", "safe_substitutes")}
+    # The lookups are independent, so they go out together: one network round trip instead of four.
+    calls = {n: {"drug": drug} for n in ("plants_for_drug", "substitute_trap", "safe_substitutes")}
+    if hospital:
+        calls["hospital_memory"] = {"hospital": hospital}
+    with ThreadPoolExecutor(max_workers=len(calls)) as pool:
+        jobs = {n: pool.submit(run_tool, n, a) for n, a in calls.items()}
     for n, job in jobs.items():
         out, cypher = job.result()
-        trace.append({"tool": n, "input": {"drug": drug}, "cypher": cypher.strip(), "rows": _count(out)})
+        trace.append({"tool": n, "input": calls[n], "cypher": cypher.strip(), "rows": _count(out)})
     plants = jobs["plants_for_drug"].result()[0]
     traps = [t for t in jobs["substitute_trap"].result()[0] if t["shared_plants"]]
     safe = jobs["safe_substitutes"].result()[0]
@@ -270,7 +273,7 @@ def graph_only(question: str, hospital: str | None) -> dict:
         parts.append("Every same-class substitute in the graph shares a plant with it.")
     parts.append("Same class is not the same as interchangeable; the pharmacist decides.")
     if hospital:
-        mem = call("hospital_memory", hospital=hospital)
+        mem = jobs["hospital_memory"].result()[0]
         past = [d for d in mem["decisions"] if d["drug"] == drug]
         if past:
             last = past[0]
