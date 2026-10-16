@@ -41,3 +41,13 @@ Gradients, glow, glass, pills, eyebrow badges, emoji, sparkle or robot icons, st
 
 ## Dial check
 ENERGY 1: one focal point per screen (the chain). RHYTHM 2: the comparison row, the chain and the evidence table are three different compositions. MOTION 2: one draw per answer, nothing else moves.
+
+## Delivery gate (Fri 16 Oct, local, replay mode)
+- R-02 PASS: no em or en dash in any page text, README, or copy (grep returns 0).
+- R-03 PASS: at 375px, page scrollWidth equals viewport width; tabs wrap to two rows; comparison stacks with the graph answer first; chain switches to the vertical layout and every label fits its box.
+- R-17, R-36, R-38 PASS: every number on screen comes from `/api/meta`, the graph, or `eval/results.json`. Hospitals are labelled "Demo" and the README says they are synthetic tenants.
+- R-24, R-26 PASS: four tabs are real anchors with matching panels; no other navigation.
+- R-25 PASS: ink on paper 15.87:1, secondary 7.29:1, vermilion 6.26:1, white on vermilion 6.54:1 (contrast-check.py).
+- R-27 PASS: every data view has empty, loading and error text that names the cause and the next step.
+- R-32 PASS: all controls are native links, selects, buttons, textarea or details; `:focus-visible` draws a 3px ink outline; a skip link leads to main.
+- R-35 PASS, click-through: each tab shows its panel and sets aria-current; empty drug submit is blocked by the required field; Rocuronium check shows the verdict, chain and evidence; "Show the Cypher" opens with the query; plant view for Intas lists 6 drugs and 3 hospital cards; risk view lists 25 plants; hospital change reloads 6 stocks; example button fills the question; Ask returns mode and a 2-step trace; Clear empties decisions. Console: no errors.

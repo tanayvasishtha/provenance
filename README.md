@@ -15,7 +15,7 @@ That failure repeats. ASHP counted 227 active US drug shortages in Q2 2026, and 
 ## What it does
 
 - Check a substitute: pick a drug. The page shows the substitute a label-text search would suggest next to what the graph says about it: which manufacturing plants the two drugs share, and whether any of those plants is under an FDA import alert. Then the same-class drugs that share no plant with it.
-- Ask the agent: A pharmacist asks in plain English. Claude Opus 5.5 picks graph queries as tools, and every plant, FEI number and date in its answer comes from a tool result. The page lists each tool call with its Cypher.
+- Ask the agent: a pharmacist asks in plain English. Claude Opus 5.5 picks graph queries as tools, and every plant, FEI number and date in its answer comes from a tool result. The page lists each tool call with its Cypher.
 - Hospital memory: each hospital is its own FalkorDB graph on the same server. It records what the hospital stocks and every substitution it decided, with the earlier decision kept and linked to the one that replaced it. When the pharmacist says "we switched cisplatin to oxaliplatin", the agent records it and warns that oxaliplatin also comes out of the Intas plant.
 - If a plant stops: pick a plant. The page lists every drug that depends on it, and reads the same event through each hospital's memory graph. One FDA action on the Intas plant hits three stocked drugs at the oncology centre, dexmedetomidine at the surgical hospital, and furosemide at the children's hospital.
 - Where the risk sits: plants ranked by how much of today's shortage drugs they carry.
