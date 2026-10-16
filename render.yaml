@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: provenance
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/meta
+    autoDeploy: true
+    envVars:
+      - key: PV_MODE
+        value: replay
+      - key: PV_FALKORDB_HOST
+        sync: false
+      - key: PV_FALKORDB_PORT
+        sync: false
+      - key: PV_FALKORDB_USERNAME
+        sync: false
+      - key: PV_FALKORDB_PASSWORD
+        sync: false
+      - key: PV_ANTHROPIC_API_KEY
+        sync: false

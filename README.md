@@ -154,7 +154,7 @@ Or the whole app in one container: `docker build -t provenance . && docker run -
 
 ## Deploy
 
-The live app runs the container on Railway with the graph in FalkorDB Cloud. Set `PV_FALKORDB_HOST`, `PV_FALKORDB_PORT`, `PV_FALKORDB_USERNAME` and `PV_FALKORDB_PASSWORD` to the cloud instance. On startup the app loads the committed snapshot into the cloud graph if it is empty. If the cloud instance is unreachable (free instances stop when idle), it falls back to the FalkorDB bundled in the container and loads the snapshot there, so the link keeps working.
+The live app runs the container on Render's free plan (`render.yaml`) with the graph in FalkorDB Cloud. Render puts free services to sleep after 15 idle minutes, so the first visit can take about a minute. Set `PV_FALKORDB_HOST`, `PV_FALKORDB_PORT`, `PV_FALKORDB_USERNAME` and `PV_FALKORDB_PASSWORD` to the cloud instance. On startup the app loads the committed snapshot into the cloud graph if it is empty. If the cloud instance is unreachable (free instances stop when idle), it falls back to the FalkorDB bundled in the container and loads the snapshot there, so the link keeps working.
 
 ## Data and licences
 
