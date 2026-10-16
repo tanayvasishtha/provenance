@@ -2,8 +2,7 @@
 
 const MODE_TEXT = {
   live: "Answered by Claude Opus 5.5, calling the graph tools below.",
-  replay: "Recorded answer from Claude Opus 5.5, replayed so the demo runs without an API key. The tool calls below ran live against the graph.",
-  "graph-only": "No model key set, so a rule-based planner ran the same graph tools and filled a template.",
+  "graph-only": "Computed just now: a rule-based planner chose the graph queries below and wrote the answer from their rows. With an Anthropic key, Claude Opus 5.5 does the choosing.",
 };
 
 async function loadHospitals() {
@@ -65,7 +64,7 @@ $("#ask-form").addEventListener("submit", async (ev) => {
     if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || res.statusText);
     const r = await res.json();
     $("#ask-mode").innerHTML = "";
-    $("#ask-mode").append(el("span", { class: "code" }, `mode: ${r.mode}`), ` ${MODE_TEXT[r.mode] || ""}`);
+    $("#ask-mode").append(el("span", { class: "code" }, `${r.mode}, ${(r.elapsed_ms / 1000).toFixed(2)} s`), ` ${MODE_TEXT[r.mode] || ""}`);
     $("#ask-answer").textContent = r.answer;
     if (r.note) $("#ask-mode").append(el("span", {}, ` ${r.note}`));
     const ol = $("#ask-trace");

@@ -1,23 +1,22 @@
-"""The agent: Claude decides which graph queries to run; every fact in its answer comes from a tool result.
+"""The agent: it decides which graph queries to run, and every fact in its answer comes from a tool result.
 
-Three modes, chosen per request:
-- live: a model key is set, so Claude runs and each response is recorded to data/agent_replay/.
-- replay: no key, but this exact conversation was recorded, so the recorded responses are served.
-- graph-only: no key and no recording; a rule-based planner calls the same tools and fills a template.
+Every answer is computed live against FalkorDB; nothing is recorded or replayed.
+- live: an Anthropic key is set, so Claude Opus 5.5 picks the tools.
+- graph-only: no key; a rule-based planner picks the same tools and writes the answer from their rows.
 """
 
-import hashlib
 import json
 import logging
 import re
+import time
+from concurrent.futures import ThreadPoolExecutor
 
 from . import memory, queries
 from .baseline import moiety
-from .config import ROOT, settings
+from .config import settings
 
 log = logging.getLogger("agent")
 MODEL = "claude-opus-5-5"
-REPLAY = ROOT / "data" / "agent_replay"
 MAX_STEPS = 8
 
 SYSTEM = """You help a hospital pharmacist during drug shortages. You answer from a FalkorDB graph of FDA public records: \
@@ -98,17 +97,9 @@ def run_tool(name: str, args: dict) -> tuple[dict | list, str]:
     raise ValueError(f"Unknown tool {name}")
 
 
-def _key(system: str, messages: list) -> str:
-    raw = json.dumps({"m": MODEL, "s": system, "t": [t["name"] for t in TOOLS], "msgs": messages}, sort_keys=True, default=str)
-    return hashlib.sha256(raw.encode()).hexdigest()[:24]
-
-
 def _call_model(system: str, messages: list) -> dict:
-    path = REPLAY / f"{_key(system, messages)}.json"
-    if path.exists():
-        return json.loads(path.read_text())
     if not settings.anthropic_api_key:
-        raise LookupError("no key and no recording")
+        raise LookupError("no model key")
     import anthropic
 
     client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
@@ -123,14 +114,19 @@ def _call_model(system: str, messages: list) -> dict:
         betas=["server-side-fallback-2026-07-01"],
         fallbacks="default",
     )
-    data = resp.to_dict()
-    REPLAY.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=1))
-    return data
+    return resp.to_dict()
 
 
 def ask(question: str, hospital: str | None = None) -> dict:
-    """Answer a pharmacist's question. Returns the answer, the mode used, and the trace of tool calls with Cypher."""
+    """Answer a pharmacist's question, timed end to end."""
+    start = time.perf_counter()
+    out = _ask(question, hospital)
+    out["elapsed_ms"] = round((time.perf_counter() - start) * 1000)
+    return out
+
+
+def _ask(question: str, hospital: str | None) -> dict:
+    """Returns the answer, the mode used, and the trace of tool calls with Cypher."""
     content = question if not hospital else f"[Hospital: {hospital}] {question}"
     messages: list = [{"role": "user", "content": content}]
     trace: list[dict] = []
@@ -144,7 +140,7 @@ def ask(question: str, hospital: str | None = None) -> dict:
             messages.append({"role": "assistant", "content": blocks})
             if not calls:
                 text = " ".join(b["text"] for b in blocks if b["type"] == "text").strip()
-                return {"mode": "live" if settings.anthropic_api_key else "replay", "answer": text, "trace": trace}
+                return {"mode": "live", "answer": text, "trace": trace}
             results = []
             for c in calls:
                 try:
@@ -174,8 +170,19 @@ def _count(out) -> int:
     return len(out.get("alerts", out.get("decisions", []))) if isinstance(out, dict) else 1
 
 
+_DRUG_NAMES: list[str] = []
+
+
+def warm() -> None:
+    _known_drugs()
+
+
 def _known_drugs() -> list[str]:
-    return [r["d"] for r in queries.run("MATCH (i:Ingredient)<-[:CONTAINS]-(:Product)<-[:MAKES]-() RETURN DISTINCT i.name AS d")]
+    # The drug list only changes when the graph is reloaded, so read it once per process.
+    if not _DRUG_NAMES:
+        _DRUG_NAMES.extend(r["d"] for r in queries.run(
+            "MATCH (i:Ingredient)<-[:CONTAINS]-(:Product)<-[:MAKES]-() RETURN DISTINCT i.name AS d"))
+    return _DRUG_NAMES
 
 
 def _find_drug(question: str) -> str | None:
@@ -238,9 +245,15 @@ def graph_only(question: str, hospital: str | None) -> dict:
     if not drug:
         hint = "Name a drug from the shortage list or a plant FEI number, and I will trace it."
         return {"mode": "graph-only", "answer": hint, "trace": trace}
-    plants = call("plants_for_drug", drug=drug)
-    traps = [t for t in call("substitute_trap", drug=drug) if t["shared_plants"]]
-    safe = call("safe_substitutes", drug=drug)
+    # The three lookups are independent, so they run at once; the trace keeps their logical order.
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        jobs = {n: pool.submit(run_tool, n, {"drug": drug}) for n in ("plants_for_drug", "substitute_trap", "safe_substitutes")}
+    for n, job in jobs.items():
+        out, cypher = job.result()
+        trace.append({"tool": n, "input": {"drug": drug}, "cypher": cypher.strip(), "rows": _count(out)})
+    plants = jobs["plants_for_drug"].result()[0]
+    traps = [t for t in jobs["substitute_trap"].result()[0] if t["shared_plants"]]
+    safe = jobs["safe_substitutes"].result()[0]
     parts = [f"{drug.title()} is made in {len(plants)} plant{'s' if len(plants) != 1 else ''}."]
     flagged = [p for p in plants if p["import_alert_dates"]]
     if flagged:

@@ -52,9 +52,8 @@ async function loadMeta() {
     const m = await api("/api/meta");
     $("#freshness").innerHTML = "";
     $("#freshness").append(
-      `Graph built from FDA public records: ${fmt.format(m.plants)} plants, ${fmt.format(m.products)} products, `
-      + `${fmt.format(m.current_shortages)} current shortage entries. Mode: `,
-      el("span", { class: "code" }, m.mode), ".");
+      `Live graph of FDA public records, pulled ${m.snapshot}: ${fmt.format(m.plants)} plants, `
+      + `${fmt.format(m.products)} products, ${fmt.format(m.current_shortages)} shortage entries. Every answer is a live query.`);
   } catch (e) {
     setState($("#freshness"), `Graph not reachable (${e.message}). Start FalkorDB with scripts/falkordb-wsl.sh, then reload.`, true);
   }
@@ -74,8 +73,8 @@ async function loadDrugs() {
     };
     group(`On the FDA shortage list now (${short.length})`, short);
     group("Other drugs in the graph", other);
-    // Open on the case that started it all, so the first screen shows an answer rather than an empty form.
-    const wanted = (new URLSearchParams(location.search).get("drug") || "CISPLATIN").toUpperCase();
+    // A shared link (?drug=...) opens on that drug; otherwise nothing runs until the user picks one.
+    const wanted = (new URLSearchParams(location.search).get("drug") || "").toUpperCase();
     if (wanted && [...short, ...other].includes(wanted)) { sel.value = wanted; check(wanted); }
   } catch (e) {
     sel.innerHTML = "";
@@ -387,3 +386,8 @@ loadFinding();
 loadDrugs();
 loadPlants();
 showView();
+
+document.querySelectorAll(".chip[data-drug]").forEach((b) => b.addEventListener("click", () => {
+  $("#drug").value = b.dataset.drug;
+  check(b.dataset.drug);
+}));

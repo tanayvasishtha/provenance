@@ -40,7 +40,7 @@ a { color: inherit; text-underline-offset: 3px; }
 code { font-family: var(--mono); font-size: 0.9em; background: var(--teal-50); padding: 1px 5px; border-radius: 4px; }
 
 /* App bar: compact, sticky, the views as a segmented control. */
-.appbar { position: sticky; top: 0; z-index: 10; background: rgba(8, 63, 66, 0.96); backdrop-filter: saturate(140%) blur(8px); color: #fff; }
+.appbar { position: sticky; top: 0; z-index: 10; background: var(--tray); color: #fff; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08), 0 6px 18px -10px rgba(0, 0, 0, 0.45); }
 .appbar-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); min-height: 64px; }
 .wordmark {
   display: inline-flex; align-items: center; gap: 12px; text-decoration: none;
@@ -83,7 +83,7 @@ main.wrap { padding-top: var(--s5); padding-bottom: var(--s7); }
 }
 select, button, textarea { font: inherit; }
 select {
-  flex: 1 1 300px; min-height: 48px; padding: 0 var(--s3); border: 0; border-radius: var(--r-sm);
+  flex: 1 1 260px; min-width: 0; max-width: 100%; min-height: 48px; padding: 0 var(--s3); border: 0; border-radius: var(--r-sm);
   background: var(--surface); color: var(--ink); font-size: 1.05em; font-weight: 600;
 }
 .picker-row select:focus-visible { outline-offset: -2px; }
@@ -101,6 +101,14 @@ button:disabled { opacity: 0.6; cursor: progress; }
 
 .state { margin: var(--s4) 0; color: var(--steel); }
 .state.error { color: var(--red); font-weight: 600; }
+
+.quick { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); margin-top: var(--s3); }
+.quick span { color: var(--steel); font-size: 0.9em; margin-right: var(--s1); }
+.chip {
+  min-height: 40px; padding: 0 var(--s3); border-radius: 999px; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-strong); font: 600 0.9em var(--sans);
+}
+.chip:hover { background: var(--teal-50); border-color: var(--teal); }
 
 /* The two answers. Lifted, because they are the result. */
 .compare { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: var(--s4); margin-top: var(--s5); }
@@ -186,7 +194,7 @@ tr.short td:first-child { font-weight: 700; }
 
 /* Agent */
 .ask-layout { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: var(--s5); align-items: start; }
-#hospital { display: block; width: 100%; border: 1px solid var(--line-strong); border-radius: var(--r-md); }
+#hospital { display: block; width: 100%; min-width: 0; max-width: 100%; border: 1px solid var(--line-strong); border-radius: var(--r-md); }
 .examples { display: flex; flex-wrap: wrap; gap: var(--s2); margin: var(--s3) 0 var(--s4); }
 .examples p { flex-basis: 100%; margin: 0; color: var(--steel); font-size: 0.88em; }
 .example {
@@ -225,6 +233,8 @@ tr.short td:first-child { font-weight: 700; }
 .colophon a { color: #fff; }
 
 @media (max-width: 900px) {
+  /* The tabs wrap to a second row here; a two-row bar must not float over the page. */
+  .appbar { position: static; }
   .appbar-inner { flex-wrap: wrap; padding-top: var(--s2); padding-bottom: var(--s2); }
   .tabs { width: 100%; }
   .hero-inner { grid-template-columns: 1fr; }

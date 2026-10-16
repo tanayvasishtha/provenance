@@ -17,6 +17,7 @@ from .config import connect, settings
 from .eval import SHORT_DRUGS
 
 log = logging.getLogger("api")
+SNAPSHOT_DATE = "16 Oct 2026"  # when `provenance build` last pulled the FDA records committed in data/
 WEB = Path(__file__).resolve().parents[2] / "web"
 def _choose_database() -> str:
     """Use the configured FalkorDB; fall back to the bundled one if it is unreachable. Load the snapshot if empty."""
@@ -41,6 +42,7 @@ def _choose_database() -> str:
 @asynccontextmanager
 async def lifespan(_app):
     log.info("FalkorDB: %s", _choose_database())
+    agent.warm()  # open the pooled connection and read the drug list now, so the first visitor gets a fast answer
     memory.seed()  # demo hospital tenants; existing decisions are kept
     yield
 
@@ -67,7 +69,7 @@ def meta() -> dict:
         "MATCH (f:Facility) WITH count(f) AS plants MATCH (p:Product) WITH plants, count(p) AS products "
         "MATCH (s:Shortage {status: 'Current'}) RETURN plants, products, count(s) AS current_shortages"
     )
-    return {"mode": settings.mode, **(counts[0] if counts else {})}
+    return {"snapshot": SNAPSHOT_DATE, **(counts[0] if counts else {})}
 
 
 @app.get("/api/eval")

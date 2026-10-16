@@ -27,8 +27,14 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
+_CLIENTS: dict = {}
+
+
 def connect():
+    """One pooled client per target. A fresh connection to FalkorDB Cloud costs about 400 ms; a query on an open one, 30 ms."""
     from falkordb import FalkorDB
 
-    return FalkorDB(host=settings.falkordb_host, port=settings.falkordb_port,
-                    username=settings.falkordb_username or None, password=settings.falkordb_password or None)
+    key = (settings.falkordb_host, settings.falkordb_port, settings.falkordb_username, settings.falkordb_password)
+    if key not in _CLIENTS:
+        _CLIENTS[key] = FalkorDB(host=key[0], port=key[1], username=key[2] or None, password=key[3] or None)
+    return _CLIENTS[key]

@@ -44,7 +44,7 @@ Where the similar-text pick shared no plant: dextrose (picked norepinephrine), d
 2. For those substances it reads 6,251 single-ingredient products from openFDA NDC, then the 3,828 DailyMed labels behind them. Each label lists the plants that make, test, pack or relabel the product, with a DUNS number and the product codes each plant handles. All 3,828 labels were read; none were skipped.
 3. The FDA establishment registry (10,438 plants) maps each DUNS to an FDA FEI number and a country. Import Alert 66-40 (471 firms) is matched to registry plants by firm name, country and address words; a firm with several sites (Intas has seven) is matched to the one address it names.
 4. `provenance load` writes it all into FalkorDB and embeds each drug's "Indications and usage" label text into a FalkorDB vector index for the baseline.
-5. The web app and the agent run the queries below. With no API key the agent replays recorded answers, or falls back to a rule-based planner that runs the same tools; the page says which mode answered.
+5. The web app and the agent run the queries below, live, on every request; nothing is recorded or replayed. With no API key the agent's planner is rule-based; with one, Claude Opus 5.5 chooses the tools. The page says which mode answered and how long it took. Reusing one pooled connection to FalkorDB Cloud brought a typical answer from 2.1 s to under 0.1 s.
 
 ## Graph model
 
@@ -150,7 +150,7 @@ uv run provenance load
 uv run provenance serve
 ```
 
-Open http://localhost:8000. No API key is needed: the committed snapshot in `data/` loads the graph, and the agent replays recorded answers or runs in graph-only mode. Without Docker on Windows, `scripts/falkordb-wsl.sh` runs FalkorDB inside WSL with no admin rights.
+Open http://localhost:8000. No API key is needed: the committed snapshot in `data/` loads the graph, and the agent runs in graph-only mode. Without Docker on Windows, `scripts/falkordb-wsl.sh` runs FalkorDB inside WSL with no admin rights.
 
 Or the whole app in one container: `docker build -t provenance . && docker run -p 8000:8000 provenance`.
 
@@ -160,7 +160,7 @@ Or the whole app in one container: `docker build -t provenance . && docker run -
 | `uv run provenance eval` | Rewrites `eval/results.md` and `eval/results.json` |
 | `uv run pytest` | Parser tests, plus graph tests when FalkorDB is up |
 | `PV_MODE=live uv run provenance build` | Re-pull everything from FDA (about 2 hours at DailyMed's pace) |
-| `PV_ANTHROPIC_API_KEY=... uv run provenance serve` | Agent answers live with Claude Opus 5.5 and records them |
+| `PV_ANTHROPIC_API_KEY=... uv run provenance serve` | Agent chooses its tools with Claude Opus 5.5 |
 
 ## Deploy
 
