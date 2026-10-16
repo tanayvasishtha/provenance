@@ -2,7 +2,7 @@
 
 When a drug runs short, a hospital pharmacist picks a substitute. Provenance checks whether that substitute is made in the same plant as the drug that ran out, using a FalkorDB graph built from FDA public records, and an agent that answers from the graph.
 
-Demo video: _link added after recording_ · Live app: _link added after deploy_ · Tracks: Agents That Act on Connected Data, Agent Memory and Coordination
+Demo video: _link added after recording_ · Live app: https://provenance-imzk.onrender.com (free hosting; the first visit after a quiet spell takes about a minute to wake) · Tracks: Agents That Act on Connected Data, Agent Memory and Coordination
 
 ## The problem
 
@@ -15,7 +15,7 @@ That failure repeats. ASHP counted 227 active US drug shortages in Q2 2026, and 
 ## What it does
 
 - Check a substitute: pick a drug. The page shows the substitute a label-text search would suggest next to what the graph says about it: which manufacturing plants the two drugs share, and whether any of those plants is under an FDA import alert. Then the same-class drugs that share no plant with it.
-- Ask the agent: a pharmacist asks in plain English. Claude Opus 5.5 picks graph queries as tools, and every plant, FEI number and date in its answer comes from a tool result. The page lists each tool call with its Cypher.
+- Ask the agent: a pharmacist asks in plain English and the agent picks graph queries as tools; every plant, FEI number and date in its answer comes from a tool result, and the page lists each tool call with its Cypher. With an Anthropic key it runs on Claude Opus 5.5. The live demo has no key, so it runs the graph-only planner over the same nine tools, and the page says so.
 - Hospital memory: each hospital is its own FalkorDB graph on the same server. It records what the hospital stocks and every substitution it decided, with the earlier decision kept and linked to the one that replaced it. When the pharmacist says "we switched cisplatin to oxaliplatin", the agent records it and warns that oxaliplatin also comes out of the Intas plant.
 - If a plant stops: pick a plant. The page lists every drug that depends on it, and reads the same event through each hospital's memory graph. One FDA action on the Intas plant hits three stocked drugs at the oncology centre, dexmedetomidine at the surgical hospital, and furosemide at the children's hospital.
 - Where the risk sits: plants ranked by how much of today's shortage drugs they carry.
@@ -179,6 +179,6 @@ Snapshot taken 16 October 2026. Incident figures: KFF Health News and FiercePhar
 
 ## Built with
 
-FalkorDB 6.0.1 (also tested on 4.22.1), Python 3.11, FastAPI, the Anthropic Python SDK (Claude Opus 5.5 with tool use), fastembed (BAAI/bge-small-en-v1.5), plain HTML, CSS and JavaScript.
+FalkorDB 6.0.1 (also tested on 4.22.1), Python 3.11, FastAPI, the Anthropic Python SDK (Claude Opus 5.5 with tool use, used when a key is set), fastembed (BAAI/bge-small-en-v1.5), plain HTML, CSS and JavaScript.
 
 AI coding tools: Claude Code was used to write and review code and copy during the event, as the rules ask entrants to disclose.
