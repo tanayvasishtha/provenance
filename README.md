@@ -14,11 +14,11 @@ That failure repeats. ASHP counted 227 active US drug shortages in Q2 2026, and 
 
 ## What it does
 
-- **Check a substitute.** Pick a drug. The page shows the substitute a label-text search would suggest next to what the graph says about it: which manufacturing plants the two drugs share, and whether any of those plants is under an FDA import alert. Then the same-class drugs that share no plant with it.
-- **Ask the agent.** A pharmacist asks in plain English. Claude Opus 5.5 picks graph queries as tools, and every plant, FEI number and date in its answer comes from a tool result. The page lists each tool call with its Cypher.
-- **Hospital memory.** Each hospital is its own FalkorDB graph on the same server. It records what the hospital stocks and every substitution it decided, with the earlier decision kept and linked to the one that replaced it. When the pharmacist says "we switched cisplatin to oxaliplatin", the agent records it and warns that oxaliplatin also comes out of the Intas plant.
-- **If a plant stops.** Pick a plant. The page lists every drug that depends on it, and reads the same event through each hospital's memory graph. One FDA action on the Intas plant hits three stocked drugs at the oncology centre, dexmedetomidine at the surgical hospital, and furosemide at the children's hospital.
-- **Where the risk sits.** Plants ranked by how much of today's shortage drugs they carry.
+- Check a substitute: pick a drug. The page shows the substitute a label-text search would suggest next to what the graph says about it: which manufacturing plants the two drugs share, and whether any of those plants is under an FDA import alert. Then the same-class drugs that share no plant with it.
+- Ask the agent: A pharmacist asks in plain English. Claude Opus 5.5 picks graph queries as tools, and every plant, FEI number and date in its answer comes from a tool result. The page lists each tool call with its Cypher.
+- Hospital memory: each hospital is its own FalkorDB graph on the same server. It records what the hospital stocks and every substitution it decided, with the earlier decision kept and linked to the one that replaced it. When the pharmacist says "we switched cisplatin to oxaliplatin", the agent records it and warns that oxaliplatin also comes out of the Intas plant.
+- If a plant stops: pick a plant. The page lists every drug that depends on it, and reads the same event through each hospital's memory graph. One FDA action on the Intas plant hits three stocked drugs at the oncology centre, dexmedetomidine at the surgical hospital, and furosemide at the children's hospital.
+- Where the risk sits: plants ranked by how much of today's shortage drugs they carry.
 
 The three hospitals are synthetic demo tenants. Every drug, plant and FDA action they point at is a real record.
 
@@ -116,10 +116,10 @@ All queries live in [src/provenance/queries.py](src/provenance/queries.py); the 
 
 ## What broke and how it was fixed
 
-- **Repackers looked like factories.** Labels list repackers and relabellers next to manufacturers. Counting them made the shared-plant rate 94%. Split into `MAKES` and `HANDLES`; the honest rate is 78%.
-- **Two Intas sites, two dates.** The first matcher attached both Intas import-alert entries (June and November 2023) to one plant. The November entry belongs to a different site (FEI 3003157498). The matcher now scores every registered site of the firm by shared address words and takes the best one. A test pins this.
-- **DailyMed rate limits.** The first full pull died on HTTP 429 at label 1,739. The fetcher now paces DailyMed to one request every 0.35 s, honours `Retry-After`, and records every response so a rerun resumes.
-- **Combination products pulled in unrelated classes.** Dextrose combinations dragged heparin into scope. Scope now uses single-ingredient products only.
+- Repackers looked like factories: labels list repackers and relabellers next to manufacturers. Counting them made the shared-plant rate 94%. Split into `MAKES` and `HANDLES`; the honest rate is 78%.
+- Two Intas sites, two dates: the first matcher attached both Intas import-alert entries (June and November 2023) to one plant. The November entry belongs to a different site (FEI 3003157498). The matcher now scores every registered site of the firm by shared address words and takes the best one. A test pins this.
+- DailyMed rate limits: the first full pull died on HTTP 429 at label 1,739. The fetcher now paces DailyMed to one request every 0.35 s, honours `Retry-After`, and records every response so a rerun resumes.
+- Combination products pulled in unrelated classes: dextrose combinations dragged heparin into scope. Scope now uses single-ingredient products only.
 
 ## Known gaps
 

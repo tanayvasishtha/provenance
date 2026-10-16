@@ -173,6 +173,6 @@ textarea {
   .memory { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: var(--s4); }
   .side-rag { border-right: 0; padding-right: 0; border-top: 1px solid var(--rule); padding-top: var(--s4); }
   .chain-fig figcaption { display: none; }
-  .tabs { gap: var(--s4); }
+  .tabs { gap: 0 var(--s4); flex-wrap: wrap; overflow-x: visible; }
   main.wrap { padding-top: var(--s4); }
 }

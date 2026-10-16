@@ -237,7 +237,8 @@ function renderChain(drug, trap, ragPick) {
     Object.entries({ x: p.x, y: p.y, width: nodeW, height: nodeH }).forEach(([k, v]) => r.setAttribute(k, v));
     const t = document.createElementNS(NS, "text");
     t.setAttribute("x", p.x + 12); t.setAttribute("y", p.y + 22);
-    t.textContent = label.length > 26 ? `${label.slice(0, 25)}…` : label;
+    const max = narrow ? 22 : 26;
+    t.textContent = label.length > max ? `${label.slice(0, max - 1)}…` : label;
     const s = document.createElementNS(NS, "text");
     s.setAttribute("x", p.x + 12); s.setAttribute("y", p.y + 41); s.setAttribute("class", "sub");
     s.textContent = sub;
