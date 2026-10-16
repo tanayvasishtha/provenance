@@ -5,10 +5,9 @@ import logging
 import re
 
 import redis
-from falkordb import FalkorDB
 
 from .build import SNAPSHOT
-from .config import settings
+from .config import connect, settings
 
 log = logging.getLogger("graph")
 
@@ -19,7 +18,7 @@ NOISE = {"limited", "ltd", "private", "pvt", "inc", "llc", "co", "corp", "corpor
 
 
 def graph():
-    return FalkorDB(host=settings.falkordb_host, port=settings.falkordb_port).select_graph(settings.graph_name)
+    return connect().select_graph(settings.graph_name)
 
 
 def _norm(name: str) -> str:

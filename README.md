@@ -152,6 +152,10 @@ Or the whole app in one container: `docker build -t provenance . && docker run -
 | `PV_MODE=live uv run provenance build` | Re-pull everything from FDA (about 2 hours at DailyMed's pace) |
 | `PV_ANTHROPIC_API_KEY=... uv run provenance serve` | Agent answers live with Claude Opus 5.5 and records them |
 
+## Deploy
+
+The live app runs the container on Railway with the graph in FalkorDB Cloud. Set `PV_FALKORDB_HOST`, `PV_FALKORDB_PORT`, `PV_FALKORDB_USERNAME` and `PV_FALKORDB_PASSWORD` to the cloud instance. On startup the app loads the committed snapshot into the cloud graph if it is empty. If the cloud instance is unreachable (free instances stop when idle), it falls back to the FalkorDB bundled in the container and loads the snapshot there, so the link keeps working.
+
 ## Data and licences
 
 | Source | Used for | Terms |

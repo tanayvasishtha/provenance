@@ -1,8 +1,10 @@
 """HTTP API and static page. Every graph answer carries the Cypher that produced it."""
 
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import redis
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -10,12 +12,34 @@ from pydantic import BaseModel, Field
 
 from . import agent, memory, queries
 from .baseline import moiety, rag_substitutes
-from .config import settings
+from .config import connect, settings
 from .eval import SHORT_DRUGS
 
+log = logging.getLogger("api")
 WEB = Path(__file__).resolve().parents[2] / "web"
+def _choose_database() -> str:
+    """Use the configured FalkorDB; fall back to the bundled one if it is unreachable. Load the snapshot if empty."""
+    try:
+        connect().connection.ping()
+    except redis.exceptions.RedisError as e:
+        if not settings.falkordb_fallback_host:
+            raise
+        log.warning("FalkorDB at %s unreachable (%s); using %s", settings.falkordb_host, e, settings.falkordb_fallback_host)
+        settings.falkordb_host, settings.falkordb_port = settings.falkordb_fallback_host, 6379
+        settings.falkordb_username = settings.falkordb_password = ""
+    if settings.graph_name not in connect().list_graphs():
+        from .baseline import embed_ingredients
+        from .graph import load
+
+        log.info("graph %s missing on %s; loading the committed snapshot", settings.graph_name, settings.falkordb_host)
+        load()
+        embed_ingredients()
+    return settings.falkordb_host
+
+
 @asynccontextmanager
 async def lifespan(_app):
+    log.info("FalkorDB: %s", _choose_database())
     memory.seed()  # demo hospital tenants; existing decisions are kept
     yield
 

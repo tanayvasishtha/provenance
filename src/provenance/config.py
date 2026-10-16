@@ -10,6 +10,11 @@ class Settings(BaseSettings):
 
     falkordb_host: str = "localhost"
     falkordb_port: int = 6379
+    # FalkorDB Cloud gives a username and password; a local FalkorDB needs neither.
+    falkordb_username: str = ""
+    falkordb_password: str = ""
+    # If the main FalkorDB is unreachable at startup (a free cloud instance can be stopped or deleted), use this one.
+    falkordb_fallback_host: str = ""
     graph_name: str = "supply"
     # replay: serve every HTTP call from fixtures/, fail if missing. live: fetch and record.
     mode: str = "replay"
@@ -20,3 +25,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def connect():
+    from falkordb import FalkorDB
+
+    return FalkorDB(host=settings.falkordb_host, port=settings.falkordb_port,
+                    username=settings.falkordb_username or None, password=settings.falkordb_password or None)

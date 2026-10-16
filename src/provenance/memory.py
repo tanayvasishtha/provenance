@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 
 from falkordb import FalkorDB
 
-from .config import settings
+from .config import connect, settings
 
 PREFIX = "hospital:"
 
@@ -32,7 +32,7 @@ DEMO_HOSPITALS = {
 
 
 def _db() -> FalkorDB:
-    return FalkorDB(host=settings.falkordb_host, port=settings.falkordb_port)
+    return connect()
 
 
 def _g(hospital: str):
