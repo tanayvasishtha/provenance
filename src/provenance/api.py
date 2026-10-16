@@ -1,5 +1,6 @@
 """HTTP API and static page. Every graph answer carries the Cypher that produced it."""
 
+import json
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -67,6 +68,13 @@ def meta() -> dict:
         "MATCH (s:Shortage {status: 'Current'}) RETURN plants, products, count(s) AS current_shortages"
     )
     return {"mode": settings.mode, **(counts[0] if counts else {})}
+
+
+@app.get("/api/eval")
+def eval_summary() -> dict:
+    """The committed eval result, so the page can state the headline finding with its real numbers."""
+    path = Path(__file__).resolve().parents[2] / "eval" / "results.json"
+    return json.loads(path.read_text())["summary"] if path.exists() else {}
 
 
 @app.get("/api/drugs")

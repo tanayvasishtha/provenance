@@ -42,6 +42,7 @@ function showView() {
   document.querySelectorAll("[data-view-panel]").forEach((p) => (p.hidden = p.dataset.viewPanel !== view));
   document.querySelectorAll(".tabs a").forEach((a) =>
     a.dataset.view === view ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  document.querySelector(".hero").hidden = view !== "check";
   if (view === "risk") loadRisk();
 }
 window.addEventListener("hashchange", showView);
@@ -73,7 +74,8 @@ async function loadDrugs() {
     };
     group(`On the FDA shortage list now (${short.length})`, short);
     group("Other drugs in the graph", other);
-    const wanted = (new URLSearchParams(location.search).get("drug") || "").toUpperCase();
+    // Open on the case that started it all, so the first screen shows an answer rather than an empty form.
+    const wanted = (new URLSearchParams(location.search).get("drug") || "CISPLATIN").toUpperCase();
     if (wanted && [...short, ...other].includes(wanted)) { sel.value = wanted; check(wanted); }
   } catch (e) {
     sel.innerHTML = "";
@@ -368,7 +370,20 @@ async function loadRisk() {
   }
 }
 
+async function loadFinding() {
+  try {
+    const s = await api("/api/eval");
+    if (!s.drugs_in_shortage_evaluated) return;
+    $("#finding-hit").textContent = s.rag_sub_shares_a_plant;
+    $("#finding-all").textContent = s.drugs_in_shortage_evaluated;
+    $("#finding").hidden = false;
+  } catch {
+    // The finding is a summary; the page works without it.
+  }
+}
+
 loadMeta();
+loadFinding();
 loadDrugs();
 loadPlants();
 showView();

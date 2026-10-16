@@ -13,21 +13,32 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 
-<header class="band">
-  <div class="wrap band-inner">
-    <div class="brand">
-      <h1 class="wordmark">Provenance</h1>
-      <p class="purpose">When a drug runs short, check whether its substitute comes out of the same plant.</p>
-    </div>
-    <p class="freshness" id="freshness">Reading the graph...</p>
+<header class="appbar">
+  <div class="wrap appbar-inner">
+    <a class="wordmark" href="#check"><span class="mark" aria-hidden="true"></span>Provenance</a>
+    <nav class="tabs" aria-label="Views">
+      <a href="#check" data-view="check" aria-current="page">Check a substitute</a>
+      <a href="#ask" data-view="ask">Ask the agent</a>
+      <a href="#plant" data-view="plant">If a plant stops</a>
+      <a href="#risk" data-view="risk">Where the risk sits</a>
+    </nav>
   </div>
-  <nav class="wrap tabs" aria-label="Views">
-    <a href="#check" data-view="check" aria-current="page">Check a substitute</a>
-    <a href="#ask" data-view="ask">Ask the agent</a>
-    <a href="#plant" data-view="plant">If a plant stops</a>
-    <a href="#risk" data-view="risk">Where the risk sits</a>
-  </nav>
 </header>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-copy">
+      <h1>When a drug runs short, is its substitute made in the same plant?</h1>
+      <p class="purpose">Provenance traces drugs and their substitutes to the plants named on FDA labels, in a FalkorDB graph, and flags the switches that would fail for the same reason.</p>
+      <p class="freshness" id="freshness">Reading the graph...</p>
+    </div>
+    <aside class="finding" id="finding" aria-label="Measured result" hidden>
+      <p class="finding-num"><span id="finding-hit"></span><span class="of"> of <span id="finding-all"></span></span></p>
+      <p class="finding-text">drugs on today's FDA shortage list: the substitute a label-text search suggests is made in a plant that also makes the drug in shortage.</p>
+      <a class="finding-link" href="https://github.com/tanayvasishtha/provenance/blob/main/eval/results.md">See every case</a>
+    </aside>
+  </div>
+</section>
 
 <main id="main" class="wrap">
 
