@@ -16,6 +16,7 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY src ./src
 COPY web ./web
 COPY data ./data
+COPY eval ./eval
 COPY deploy/start.sh ./start.sh
 RUN uv sync --frozen --no-dev && chmod +x start.sh
 ENV PATH="/app/.venv/bin:$PATH" PV_MODE=replay HF_HUB_DISABLE_TELEMETRY=1
