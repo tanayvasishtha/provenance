@@ -199,6 +199,14 @@ def graph_only(question: str, hospital: str | None) -> dict:
         trace.append({"tool": name, "input": args, "cypher": cypher.strip(), "rows": _count(out)})
         return out
 
+    if re.search(r"\b(riskiest|risk|bridge|bridges|chokepoint|systemic|most exposed)\b", question, re.I) and not _find_drug(question):
+        rows = call("bridge_plants", limit=5)
+        lines = [f"{r['plant']} (FEI {r['fei']}, {r['country']}): {r['drugs_made']} drugs across {r['classes']} classes"
+                 for r in rows]
+        return {"mode": "graph-only", "trace": trace,
+                "answer": "Plants that tie the most separate drug supply chains together, by exact betweenness centrality: "
+                          + "; ".join(lines) + ". A failure at one of them spreads shortages across drug classes."}
+
     fei = re.search(r"\bFEI\s*(\d{5,})|\b(\d{7,10})\b", question)
     if fei:
         fei = fei.group(1) or fei.group(2)
