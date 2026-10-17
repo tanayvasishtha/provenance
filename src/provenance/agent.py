@@ -49,8 +49,10 @@ What every substitute answer must say, in this order:
 plants_shared_with_substitute with its FEI number.
 2. Any shared plant that has an FDA Import Alert 66-40 date: say so with the date. This is the most important fact; never \
 leave it out.
-3. Same-class options from same_class_with_no_shared_plant, or say there are none.
-4. That same class does not mean interchangeable for a patient; the pharmacist decides.
+3. Every plant in flagged_plants_making_drug, with its FEI number and import alert date, even when no substitute is \
+proposed. If that list is empty, say none of the plants making the drug is under the alert.
+4. Same-class options from same_class_with_no_shared_plant, or say there are none.
+5. That same class does not mean interchangeable for a patient; the pharmacist decides.
 
 Rules: never name a plant, FEI number, date or count that a tool did not return. Label counts are not market share. Answer \
 in short plain sentences, no headings, no emoji."""
@@ -180,9 +182,13 @@ def check_substitute(drug: str, substitute: str) -> dict:
     rows = _other(trap.result(), drug)
     sub = substitute.strip().upper()
     match = next((r for r in rows if sub and (r["substitute"] == sub or moiety(r["substitute"]) == moiety(sub))), None)
+    made = plants.result()
     return {
         "drug": drug.upper(),
-        "plants_making_drug": plants.result(),
+        # Pulled out of the plant list: in a list of 27 plants the model skimmed past the one under import alert.
+        "flagged_plants_making_drug": [{"plant": p["plant"], "fei": p["fei"], "import_alert_dates": p["import_alert_dates"]}
+                                       for p in made if p["import_alert_dates"]],
+        "plants_making_drug": made,
         "substitute": sub or None,
         "substitute_in_same_class": match is not None,
         "plants_shared_with_substitute": match["shared_plants"] if match else [],
