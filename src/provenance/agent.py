@@ -37,19 +37,19 @@ SYSTEM = """You help a hospital pharmacist during drug shortages. You answer fro
 drug labels and the plants named on them, the FDA establishment registry, the FDA drug shortage list, and FDA Import Alert 66-40.
 
 Which tools to call:
-- A drug is short, or a substitute is proposed: call plants_for_drug, substitute_trap and safe_substitutes for the drug \
-that is short, all in your first turn. If a hospital is named, call hospital_memory in the same turn.
-- A plant (FEI number) is named: call plant_impact and plant_alert.
-- Riskiest plants, bridges, systemic or chokepoint plants: call bridge_plants. Use riskiest_plants only for exposure to \
-today's shortage list.
-- The pharmacist says they switched or chose a substitute: call record_decision, then substitute_trap to check it.
+- A drug is short, or a substitute is proposed: call check_substitute once (substitute empty if none is named). If a \
+hospital is named, call hospital_memory in the same turn. That is enough to answer; call nothing else.
+- A plant (FEI number) is named: call plant_impact and plant_alert in the same turn.
+- Riskiest plants, bridges, systemic or chokepoint plants: call bridge_plants. Use shortage_exposure only when asked which \
+plants make the most of today's shortage-list drugs.
+- The pharmacist says they switched to or chose a substitute: call record_decision and check_substitute in the same turn.
 
 What every substitute answer must say, in this order:
-1. Whether the proposed substitute shares a manufacturing plant with the drug that is short, naming each shared plant with \
-its FEI number. Use only the shared_plants of that substitute's row in substitute_trap.
+1. Whether the proposed substitute shares a manufacturing plant with the drug that is short, naming each plant in \
+plants_shared_with_substitute with its FEI number.
 2. Any shared plant that has an FDA Import Alert 66-40 date: say so with the date. This is the most important fact; never \
 leave it out.
-3. Same-class options from safe_substitutes, or say there are none.
+3. Same-class options from same_class_with_no_shared_plant, or say there are none.
 4. That same class does not mean interchangeable for a patient; the pharmacist decides.
 
 Rules: never name a plant, FEI number, date or count that a tool did not return. Label counts are not market share. Answer \
@@ -71,6 +71,11 @@ def _tool(name: str, description: str, props: dict, required: list[str]) -> dict
 DECISION = {**HOSP, **DRUG, "substitute": {"type": "string"}, "reason": {"type": "string"}}
 
 TOOLS = [
+    _tool("check_substitute", "Everything about switching from a drug in shortage to a proposed substitute, in one call: the "
+          "plants that make the drug (with import alert dates), the plants the substitute shares with it, the other "
+          "same-class drugs that share plants, and the same-class options with no shared plant. Pass an empty substitute "
+          "when none is proposed.",
+          {**DRUG, "substitute": {"type": "string", "description": "Proposed substitute, or empty."}}, ["drug", "substitute"]),
     _tool("plants_for_drug", "Every plant that manufactures the drug, with FEI, country, label count and FDA import alert dates.",
           DRUG, ["drug"]),
     _tool("substitute_trap", "Same-class substitutes for the drug and the manufacturing plants each shares with it.",
@@ -79,7 +84,7 @@ TOOLS = [
           "with label count, flagged plants and shortage status.", DRUG, ["drug"]),
     _tool("plant_impact", "Every drug a plant manufactures, its share of US labels, and whether it is on the shortage list now.",
           FEI, ["fei"]),
-    _tool("riskiest_plants", "Plants ranked by how much of today's shortage drugs they carry.",
+    _tool("shortage_exposure", "Plants ranked by how much of today's shortage-list drugs they make. Not for bridges.",
           {"limit": {"type": "integer", "description": "How many plants, 1 to 25."}}, ["limit"]),
     _tool("bridge_plants", "Plants that bridge the most separate drug supply chains, by betweenness centrality "
           "(FalkorDB algo.betweenness). A failure there spreads shortages across drug classes.",
@@ -99,6 +104,8 @@ def _other(rows: list[dict], drug: str) -> list[dict]:
 
 def run_tool(name: str, args: dict) -> tuple[dict | list, str]:
     """Execute one tool. Returns (result, the Cypher behind it) so the UI can show both."""
+    if name == "check_substitute":
+        return check_substitute(args["drug"], args.get("substitute", "")), queries.TRAP
     if name == "plants_for_drug":
         return queries.drug_plants(args["drug"]), queries.DRUG_PLANTS
     if name == "substitute_trap":
@@ -107,7 +114,7 @@ def run_tool(name: str, args: dict) -> tuple[dict | list, str]:
         return _other(queries.safe(args["drug"]), args["drug"]), queries.SAFE
     if name == "plant_impact":
         return queries.plant_down(args["fei"]), queries.PLANT_DOWN
-    if name == "riskiest_plants":
+    if name == "shortage_exposure":
         return queries.chokepoints(max(1, min(25, int(args["limit"])))), queries.CHOKEPOINTS
     if name == "bridge_plants":
         return queries.bridges(max(1, min(25, int(args["limit"])))), queries.BRIDGES
@@ -147,6 +154,25 @@ def ask(question: str, hospital: str | None = None) -> dict:
     out = _ask(question, hospital)
     out["elapsed_ms"] = round((time.perf_counter() - start) * 1000)
     return out
+
+
+def check_substitute(drug: str, substitute: str) -> dict:
+    """The three substitute lookups at once, shaped so a small model reads the answer straight off it."""
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        plants, trap, safe = (pool.submit(f, drug) for f in (queries.drug_plants, queries.trap, queries.safe))
+    rows = _other(trap.result(), drug)
+    sub = substitute.strip().upper()
+    match = next((r for r in rows if sub and (r["substitute"] == sub or moiety(r["substitute"]) == moiety(sub))), None)
+    return {
+        "drug": drug.upper(),
+        "plants_making_drug": plants.result(),
+        "substitute": sub or None,
+        "substitute_in_same_class": match is not None,
+        "plants_shared_with_substitute": match["shared_plants"] if match else [],
+        "other_same_class_drugs_sharing_plants": [{"drug": r["substitute"], "shared_plants": len(r["shared_plants"])}
+                                                  for r in rows if r is not match and r["shared_plants"]],
+        "same_class_with_no_shared_plant": _other(safe.result(), drug),
+    }
 
 
 def _run_calls(calls: list[tuple[str, str, dict]], trace: list[dict]) -> dict[str, str]:
