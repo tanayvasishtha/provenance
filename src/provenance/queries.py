@@ -69,7 +69,8 @@ OPTIONAL MATCH (i)<-[:CONTAINS]-(:Product)<-[:MAKES]-(shared:Facility)-[:MAKES]-
 WITH i, alt, count(DISTINCT shared) AS shared_plants
 WHERE shared_plants = 0
 MATCH (alt)<-[:CONTAINS]-(q:Product)
-OPTIONAL MATCH (q)<-[:MAKES]-(bad:Facility)-[:FLAGGED]->(:Action)
+// The FLAGGED hop sits in WHERE: FalkorDB 4.22 drops it from a two-hop OPTIONAL MATCH and counts every plant.
+OPTIONAL MATCH (q)<-[:MAKES]-(bad:Facility) WHERE (bad)-[:FLAGGED]->(:Action)
 OPTIONAL MATCH (q)-[:IN_SHORTAGE]->(s:Shortage {status: 'Current'})
 WITH alt, count(DISTINCT q) AS labels, count(DISTINCT bad) AS flagged_plants, count(DISTINCT s) AS short_now
 RETURN alt.name AS substitute, labels, flagged_plants, short_now

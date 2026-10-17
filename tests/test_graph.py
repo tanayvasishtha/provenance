@@ -74,3 +74,16 @@ def test_a_question_never_writes_to_memory(monkeypatch):
     agent.ask("We switched cisplatin to oxaliplatin because carboplatin shares the Intas plant.", "oncology-centre")
     assert memory.profile("oncology-centre")["decisions"][0]["substitute"] == "OXALIPLATIN"
     memory.forget("oncology-centre")
+
+
+def test_everyday_drug_names_resolve_to_graph_names():
+    out, _ = agent.run_tool("check_substitute", {"drug": "Midazolam", "substitute": ""})
+    assert out["drug"] == "MIDAZOLAM HYDROCHLORIDE"
+    assert out["same_class_with_no_shared_plant"], "plain names must not come back empty"
+
+
+def test_safe_substitutes_count_only_flagged_plants():
+    # FalkorDB 4.22 drops the second hop of a two-hop OPTIONAL MATCH; the query keeps it in WHERE instead.
+    flagged = {r["substitute"]: r["flagged_plants"] for r in queries.safe("MIDAZOLAM HYDROCHLORIDE")}
+    assert flagged["CLOBAZAM"] == 0
+    assert flagged["CLONAZEPAM"] == 2  # both Intas sites make clonazepam

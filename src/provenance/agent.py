@@ -107,8 +107,20 @@ def _other(rows: list[dict], drug: str) -> list[dict]:
     return [r for r in rows if moiety(r["substitute"]) != moiety(drug.upper())]
 
 
+def resolve_drug(name: str) -> str:
+    """Map an everyday name to the graph's substance name: "Midazolam" is stored as MIDAZOLAM HYDROCHLORIDE.
+    Without this, a model asking in plain words gets empty rows and reports that nothing exists."""
+    up = " ".join(name.strip().upper().split())
+    names = _known_drugs()
+    if not up or up in names:
+        return up
+    same = sorted((n for n in names if moiety(n) == moiety(up)), key=len)
+    return same[0] if same else up
+
+
 def run_tool(name: str, args: dict) -> tuple[dict | list, str]:
     """Execute one tool. Returns (result, the Cypher behind it) so the UI can show both."""
+    args = {k: resolve_drug(v) if k in ("drug", "substitute") and isinstance(v, str) else v for k, v in args.items()}
     if name == "check_substitute":
         return check_substitute(args["drug"], args.get("substitute", "")), queries.TRAP
     if name == "plants_for_drug":
