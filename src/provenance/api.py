@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -70,7 +71,7 @@ def meta() -> dict:
         "MATCH (f:Facility) WITH count(f) AS plants MATCH (p:Product) WITH plants, count(p) AS products "
         "MATCH (s:Shortage {status: 'Current'}) RETURN plants, products, count(s) AS current_shortages"
     )
-    return {"snapshot": SNAPSHOT_DATE, **(counts[0] if counts else {})}
+    return {"snapshot": SNAPSHOT_DATE, "build": os.environ.get("RENDER_GIT_COMMIT", "local")[:7], **(counts[0] if counts else {})}
 
 
 @app.get("/api/eval")
