@@ -1,7 +1,7 @@
 /* Ask the agent, and each hospital's memory graph. Uses $, api, el, title, setState from app.js. */
 
 const MODE_TEXT = {
-  live: "Answered by Claude Opus 5.5, calling the graph tools below.",
+  live: "The model chose the graph queries below and wrote the answer from their rows.",
   "graph-only": "Computed just now: a rule-based planner chose the graph queries below and wrote the answer from their rows. With an Anthropic key, Claude Opus 5.5 does the choosing.",
 };
 
@@ -64,7 +64,8 @@ $("#ask-form").addEventListener("submit", async (ev) => {
     if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || res.statusText);
     const r = await res.json();
     $("#ask-mode").innerHTML = "";
-    $("#ask-mode").append(el("span", { class: "code" }, `${r.mode}, ${(r.elapsed_ms / 1000).toFixed(2)} s`), ` ${MODE_TEXT[r.mode] || ""}`);
+    const who = r.mode === "live" ? `live, ${r.model}` : r.mode;
+    $("#ask-mode").append(el("span", { class: "code" }, `${who}, ${(r.elapsed_ms / 1000).toFixed(2)} s`), ` ${MODE_TEXT[r.mode] || ""}`);
     $("#ask-answer").textContent = r.answer;
     if (r.note) $("#ask-mode").append(el("span", {}, ` ${r.note}`));
     const ol = $("#ask-trace");

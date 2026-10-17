@@ -1,7 +1,7 @@
 """The agent: it decides which graph queries to run, and every fact in its answer comes from a tool result.
 
 Every answer is computed live against FalkorDB; nothing is recorded or replayed.
-- live: an Anthropic key is set, so Claude Opus 5.5 picks the tools.
+- live: an OpenAI key (PV_OPENAI_API_KEY) or an Anthropic key is set, so the model picks the tools.
 - graph-only: no key; a rule-based planner picks the same tools and writes the answer from their rows.
 """
 
@@ -17,7 +17,21 @@ from .config import settings
 
 log = logging.getLogger("agent")
 MODEL = "claude-opus-5-5"
-MAX_STEPS = 8
+MAX_STEPS = 4
+MAX_TOOL_TEXT = 6000  # characters of tool output sent back to the model per call; keeps each request small
+
+_budget = {"day": "", "used": 0}
+
+
+def _spend_one() -> bool:
+    """Count one model call against today's cap. False once the cap is reached."""
+    today = time.strftime("%Y-%m-%d", time.gmtime())
+    if _budget["day"] != today:
+        _budget.update(day=today, used=0)
+    if _budget["used"] >= settings.model_calls_per_day:
+        return False
+    _budget["used"] += 1
+    return True
 
 SYSTEM = """You help a hospital pharmacist during drug shortages. You answer from a FalkorDB graph of FDA public records: \
 drug labels and the plants named on them, the FDA establishment registry, the FDA drug shortage list, and FDA Import Alert 66-40.
@@ -125,43 +139,91 @@ def ask(question: str, hospital: str | None = None) -> dict:
     return out
 
 
+def _run_calls(calls: list[tuple[str, str, dict]], trace: list[dict]) -> dict[str, str]:
+    """Run the model's tool calls at once (they are independent reads) and return each result as JSON text by call id."""
+    def one(call):
+        cid, name, args = call
+        try:
+            out, cypher = run_tool(name, args)
+            return cid, {"tool": name, "input": args, "cypher": cypher.strip(), "rows": _count(out)}, json.dumps(out, default=str)
+        except Exception as e:  # noqa: BLE001  a bad tool call goes back to the model as an error, not a crash
+            return cid, None, f"Error: {e}"
+
+    with ThreadPoolExecutor(max_workers=max(1, len(calls))) as pool:
+        done = list(pool.map(one, calls))
+    trace.extend(t for _, t, _ in done if t)
+    return {cid: text for cid, _, text in done}
+
+
+def _ask_openai(content: str, trace: list[dict]) -> dict:
+    from openai import OpenAI
+
+    client = OpenAI(api_key=settings.openai_api_key)
+    tools = [{"type": "function", "function": {"name": t["name"], "description": t["description"],
+                                               "parameters": t["input_schema"], "strict": True}} for t in TOOLS]
+    messages: list = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": content}]
+    for _ in range(MAX_STEPS):
+        if not _spend_one():
+            raise LookupError("daily model budget used")
+        msg = client.chat.completions.create(model=settings.openai_model, messages=messages, tools=tools,
+                                             max_completion_tokens=600).choices[0].message
+        if not msg.tool_calls:
+            return {"mode": "live", "model": settings.openai_model, "answer": (msg.content or msg.refusal or "").strip(), "trace": trace}
+        messages.append(msg.model_dump(exclude_none=True))
+        calls = [(c.id, c.function.name, json.loads(c.function.arguments or "{}")) for c in msg.tool_calls]
+        results = _run_calls(calls, trace)
+        messages += [{"role": "tool", "tool_call_id": cid, "content": text[:MAX_TOOL_TEXT]} for cid, text in results.items()]
+    return {"mode": "live", "model": settings.openai_model, "answer": "Stopped after too many steps without an answer.", "trace": trace}
+
+
+def _ask_anthropic(content: str, trace: list[dict]) -> dict:
+    messages: list = [{"role": "user", "content": content}]
+    for _ in range(MAX_STEPS):
+        if not _spend_one():
+            raise LookupError("daily model budget used")
+        resp = _call_model(SYSTEM, messages)
+        blocks = resp["content"]
+        if resp.get("stop_reason") == "refusal":
+            return {"mode": "live", "model": MODEL, "answer": "The model declined this request.", "trace": trace}
+        calls = [(b["id"], b["name"], b["input"]) for b in blocks if b["type"] == "tool_use"]
+        messages.append({"role": "assistant", "content": blocks})
+        if not calls:
+            text = " ".join(b["text"] for b in blocks if b["type"] == "text").strip()
+            return {"mode": "live", "model": MODEL, "answer": text, "trace": trace}
+        results = _run_calls(calls, trace)
+        messages.append({"role": "user", "content": [{"type": "tool_result", "tool_use_id": cid, "content": text}
+                                                     for cid, text in results.items()]})
+    return {"mode": "live", "model": MODEL, "answer": "Stopped after too many steps without an answer.", "trace": trace}
+
+
 def _ask(question: str, hospital: str | None) -> dict:
     """Returns the answer, the mode used, and the trace of tool calls with Cypher."""
     content = question if not hospital else f"[Hospital: {hospital}] {question}"
-    messages: list = [{"role": "user", "content": content}]
     trace: list[dict] = []
     try:
-        for _ in range(MAX_STEPS):
-            resp = _call_model(SYSTEM, messages)
-            blocks = resp["content"]
-            if resp.get("stop_reason") == "refusal":
-                return {"mode": "live", "answer": "The model declined this request.", "trace": trace}
-            calls = [b for b in blocks if b["type"] == "tool_use"]
-            messages.append({"role": "assistant", "content": blocks})
-            if not calls:
-                text = " ".join(b["text"] for b in blocks if b["type"] == "text").strip()
-                return {"mode": "live", "answer": text, "trace": trace}
-            results = []
-            for c in calls:
-                try:
-                    out, cypher = run_tool(c["name"], c["input"])
-                    trace.append({"tool": c["name"], "input": c["input"], "cypher": cypher.strip(), "rows": _count(out)})
-                    results.append({"type": "tool_result", "tool_use_id": c["id"], "content": json.dumps(out, default=str)})
-                except Exception as e:  # noqa: BLE001  a bad tool call goes back to the model as an error, not a crash
-                    results.append({"type": "tool_result", "tool_use_id": c["id"], "content": f"Error: {e}", "is_error": True})
-            messages.append({"role": "user", "content": results})
-        return {"mode": "live", "answer": "Stopped after too many steps without an answer.", "trace": trace}
+        if settings.openai_api_key:
+            return _ask_openai(content, trace)
+        if settings.anthropic_api_key:
+            return _ask_anthropic(content, trace)
     except LookupError:
-        return graph_only(question, hospital)
+        out = graph_only(question, hospital)
+        out["note"] = "Today's model budget is used up, so this answer came from the graph-only planner."
+        return out
     except Exception as e:  # noqa: BLE001  any model failure: answer from the graph instead of returning a 500
-        import anthropic
-
-        if not isinstance(e, anthropic.APIError):
+        if not _is_model_error(e):
             raise
         log.warning("model call failed (%s); answering in graph-only mode", type(e).__name__)
         out = graph_only(question, hospital)
         out["note"] = f"The model call failed ({type(e).__name__}), so this answer came from the graph-only planner."
         return out
+    return graph_only(question, hospital)
+
+
+def _is_model_error(e: Exception) -> bool:
+    import anthropic
+    import openai
+
+    return isinstance(e, (anthropic.APIError, openai.OpenAIError))
 
 
 def _count(out) -> int:
