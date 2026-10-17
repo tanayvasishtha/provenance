@@ -2,7 +2,12 @@
 
 When a drug runs short, a hospital pharmacist picks a substitute. Provenance checks whether that substitute is made in the same plant as the drug that ran out, using a FalkorDB graph built from FDA public records, and an agent that answers from the graph.
 
-Demo video: _link added after recording_ · Live app: https://provenance-imzk.onrender.com (free hosting; the first visit after a quiet spell takes about a minute to wake) · Tracks: Agents That Act on Connected Data, Agent Memory and Coordination
+[![Watch the 2:40 demo](docs/demo-thumbnail.png)](https://github.com/tanayvasishtha/provenance/blob/main/docs/provenance-demo.mp4)
+
+- **Demo video (2:40):** [docs/provenance-demo.mp4](https://github.com/tanayvasishtha/provenance/blob/main/docs/provenance-demo.mp4), recorded on the live app
+- **Live app:** https://provenance-imzk.onrender.com (free hosting; the first visit after a quiet spell takes about a minute to wake)
+- **Tracks:** Agents That Act on Connected Data; Agent Memory and Coordination
+- **Jump to:** [graph model](#graph-model) · [the Cypher](#the-cypher-the-product-depends-on) · [run it locally](#run-it) · [results](#results)
 
 ![Cisplatin checked: the label search suggests carboplatin, the graph shows it comes out of three of the same plants, one under FDA import alert since 06/01/2023](docs/check.png)
 
