@@ -15,7 +15,7 @@ That failure repeats. ASHP counted 227 active US drug shortages in Q2 2026, and 
 ## What it does
 
 - Check a substitute: pick a drug. The page shows the substitute a label-text search would suggest next to what the graph says about it: which manufacturing plants the two drugs share, and whether any of those plants is under an FDA import alert. Then the same-class drugs that share no plant with it.
-- Ask the agent: a pharmacist asks in plain English and the agent picks graph queries as tools; every plant, FEI number and date in its answer comes from a tool result, and the page lists each tool call with its Cypher. On the live demo, OpenAI's gpt-4.1-nano chooses the tools through function calling, capped at 200 model calls a day; with no key (or past the cap) a rule-based planner runs the same nine tools. The page says which answered and how long it took.
+- Ask the agent: a pharmacist asks in plain English and the agent picks graph queries as tools; every plant, FEI number and date in its answer comes from a tool result, and the page lists each tool call with its Cypher. On the live demo, OpenAI's gpt-4.1-mini chooses the tools through function calling, capped at 200 model calls a day; with no key (or past the cap) a rule-based planner runs the same nine tools. The page says which answered and how long it took.
 - Hospital memory: each hospital is its own FalkorDB graph on the same server. It records what the hospital stocks and every substitution it decided, with the earlier decision kept and linked to the one that replaced it. When the pharmacist says "we switched cisplatin to oxaliplatin", the agent records it and warns that oxaliplatin also comes out of the Intas plant.
 - If a plant stops: pick a plant. The page lists every drug that depends on it, and reads the same event through each hospital's memory graph. One FDA action on the Intas plant hits three stocked drugs at the oncology centre, dexmedetomidine at the surgical hospital, and furosemide at the children's hospital.
 - Where the risk sits: plants ranked by how much of today's shortage drugs they carry, and plants ranked by exact betweenness centrality (FalkorDB `algo.betweenness`), which finds the plants that tie separate drug supply chains together.
@@ -44,7 +44,7 @@ Where the similar-text pick shared no plant: dextrose (picked norepinephrine), d
 2. For those substances it reads 6,251 single-ingredient products from openFDA NDC, then the 3,828 DailyMed labels behind them. Each label lists the plants that make, test, pack or relabel the product, with a DUNS number and the product codes each plant handles. All 3,828 labels were read; none were skipped.
 3. The FDA establishment registry (10,438 plants) maps each DUNS to an FDA FEI number and a country. Import Alert 66-40 (471 firms) is matched to registry plants by firm name, country and address words; a firm with several sites (Intas has seven) is matched to the one address it names.
 4. `provenance load` writes it all into FalkorDB and embeds each drug's "Indications and usage" label text into a FalkorDB vector index for the baseline.
-5. The web app and the agent run the queries below, live, on every request; nothing is recorded or replayed. With an OpenAI key (`PV_OPENAI_API_KEY`) gpt-4.1-nano chooses the tools; an Anthropic key works too; with neither, the planner is rule-based. The page says which mode answered and how long it took. Reusing one pooled connection to FalkorDB Cloud brought a typical answer from 2.1 s to under 0.1 s.
+5. The web app and the agent run the queries below, live, on every request; nothing is recorded or replayed. With an OpenAI key (`PV_OPENAI_API_KEY`) gpt-4.1-mini chooses the tools; an Anthropic key works too; with neither, the planner is rule-based. The page says which mode answered and how long it took. Reusing one pooled connection to FalkorDB Cloud brought a typical answer from 2.1 s to under 0.1 s.
 
 ## Graph model
 
@@ -129,6 +129,7 @@ All queries live in [src/provenance/queries.py](src/provenance/queries.py); the 
 - Two Intas sites, two dates: the first matcher attached both Intas import-alert entries (June and November 2023) to one plant. The November entry belongs to a different site (FEI 3003157498). The matcher now scores every registered site of the firm by shared address words and takes the best one. A test pins this.
 - DailyMed rate limits: the first full pull died on HTTP 429 at label 1,739. The fetcher now paces DailyMed to one request every 0.35 s, honours `Retry-After`, and records every response so a rerun resumes.
 - Betweenness was sampled: `algo.betweenness` starts from 32 sampled nodes by default, so its scores are estimates. Setting `samplingSize` to the node count (398) makes them exact. Even exact, FalkorDB 4.22 and 6.0.1 return different scores on the same 671 edges; both put the same three plants on top (APL Healthcare, Fresenius Kabi FEI 3001833549, West-Ward Columbus) in a different order. The live app runs on FalkorDB Cloud (4.22). A test checks the top three on both.
+- The smallest model made up facts: with all nine tools, gpt-4.1-nano mixed rows from different drugs and claimed import alerts on midazolam's substitutes that the graph does not show. The agent now sees only tools that answer a whole question (one `check_substitute` call returns everything about a switch), and runs on gpt-4.1-mini, about $0.002 an answer with a cap of 200 model calls a day.
 - Combination products pulled in unrelated classes: dextrose combinations dragged heparin into scope. Scope now uses single-ingredient products only.
 
 ## Known gaps
@@ -160,7 +161,7 @@ Or the whole app in one container: `docker build -t provenance . && docker run -
 | `uv run provenance eval` | Rewrites `eval/results.md` and `eval/results.json` |
 | `uv run pytest` | Parser tests, plus graph tests when FalkorDB is up |
 | `PV_MODE=live uv run provenance build` | Re-pull everything from FDA (about 2 hours at DailyMed's pace) |
-| `PV_OPENAI_API_KEY=... uv run provenance serve` | Agent chooses its tools with gpt-4.1-nano (`PV_OPENAI_MODEL` to change) |
+| `PV_OPENAI_API_KEY=... uv run provenance serve` | Agent chooses its tools with gpt-4.1-mini (`PV_OPENAI_MODEL` to change) |
 
 ## Deploy
 
@@ -179,6 +180,6 @@ Snapshot taken 16 October 2026. Incident figures: KFF Health News and FiercePhar
 
 ## Built with
 
-FalkorDB 6.0.1 (also tested on 4.22.1), Python 3.11, FastAPI, the OpenAI Python SDK (gpt-4.1-nano function calling; Anthropic also supported), fastembed (BAAI/bge-small-en-v1.5), plain HTML, CSS and JavaScript.
+FalkorDB 6.0.1 (also tested on 4.22.1), Python 3.11, FastAPI, the OpenAI Python SDK (gpt-4.1-mini function calling; Anthropic also supported), fastembed (BAAI/bge-small-en-v1.5), plain HTML, CSS and JavaScript.
 
 AI coding tools: Claude Code was used to write and review code and copy during the event, as the rules ask entrants to disclose.

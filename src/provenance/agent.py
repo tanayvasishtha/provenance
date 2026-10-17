@@ -98,6 +98,11 @@ TOOLS = [
 ]
 
 
+# The model sees only tools that answer a whole question. The low-level lookups stay available to the graph-only
+# planner, but a small model given all of them mixed rows from different drugs.
+MODEL_TOOLS = [t for t in TOOLS if t["name"] not in {"plants_for_drug", "substitute_trap", "safe_substitutes"}]
+
+
 def _other(rows: list[dict], drug: str) -> list[dict]:
     return [r for r in rows if moiety(r["substitute"]) != moiety(drug.upper())]
 
@@ -138,7 +143,7 @@ def _call_model(system: str, messages: list) -> dict:
         model=MODEL,
         max_tokens=16000,
         system=system,
-        tools=TOOLS,
+        tools=MODEL_TOOLS,
         messages=messages,
         output_config={"effort": "medium"},
         # Fallbacks are on: a safety decline re-runs on a fallback model instead of returning nothing.
@@ -196,7 +201,7 @@ def _ask_openai(content: str, trace: list[dict]) -> dict:
 
     client = OpenAI(api_key=settings.openai_api_key)
     tools = [{"type": "function", "function": {"name": t["name"], "description": t["description"],
-                                               "parameters": t["input_schema"], "strict": True}} for t in TOOLS]
+                                               "parameters": t["input_schema"], "strict": True}} for t in MODEL_TOOLS]
     messages: list = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": content}]
     for _ in range(MAX_STEPS):
         if not _spend_one():

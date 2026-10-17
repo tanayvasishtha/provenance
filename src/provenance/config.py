@@ -23,7 +23,8 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     # The agent uses OpenAI when this is set (checked first), else Anthropic, else its graph-only planner.
     openai_api_key: str = ""
-    openai_model: str = "gpt-4.1-nano"
+    # gpt-4.1-nano invented import alerts in testing; mini stays with the tool rows (about $0.002 an answer).
+    openai_model: str = "gpt-4.1-mini"
     # Spend guard: model calls allowed per UTC day; past it, answers come from the free graph-only planner.
     model_calls_per_day: int = 200
     http_concurrency: int = 6
