@@ -45,12 +45,13 @@ plants make the most of today's shortage-list drugs.
 - The pharmacist says they switched to or chose a substitute: call record_decision and check_substitute in the same turn.
 
 What every substitute answer must say, in this order:
-1. Whether the proposed substitute shares a manufacturing plant with the drug that is short, naming each plant in \
-plants_shared_with_substitute with its FEI number.
-2. Any shared plant that has an FDA Import Alert 66-40 date: say so with the date. This is the most important fact; never \
-leave it out.
-3. Every plant in flagged_plants_making_drug, with its FEI number and import alert date, even when no substitute is \
-proposed. If that list is empty, say none of the plants making the drug is under the alert.
+1. If a substitute was proposed: whether it shares a manufacturing plant with the drug that is short, naming each plant \
+in plants_shared_with_substitute with its FEI number, and the import alert date of any that has one. This is the most \
+important fact; never leave it out. If no substitute was proposed, skip this point without comment.
+2. The plants in flagged_plants_making_drug, each with its FEI number and import alert date. If the list is empty, say \
+none of the plants making the drug is under FDA Import Alert 66-40.
+3. Same-class drugs in other_same_class_drugs_sharing_plants: they come out of a plant that also makes the drug, so \
+they are exposed to the same failure.
 4. Same-class options from same_class_with_no_shared_plant, or say there are none.
 5. That same class does not mean interchangeable for a patient; the pharmacist decides.
 
