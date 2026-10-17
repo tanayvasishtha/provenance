@@ -36,6 +36,45 @@ function setState(node, text, isError = false) {
   node.hidden = !text;
 }
 
+/* Cross-links: any plant or drug name on the page opens its own view. */
+function openDrug(drug) {
+  if (![...$("#drug").options].some((o) => o.value === drug)) return;
+  $("#drug").value = drug;
+  if (location.hash !== "#check") location.hash = "#check";
+  check(drug);
+  $("#check-form").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function openPlant(fei, label) {
+  if (!fei) return;
+  await loadPlants();
+  const sel = $("#plant");
+  if (![...sel.options].some((o) => o.value === fei)) sel.append(el("option", { value: fei }, label ? `${label} (FEI ${fei})` : `FEI ${fei}`));
+  sel.value = fei;
+  location.hash = "#plant";
+  $("#plant-form").requestSubmit();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function drugLink(drug) {
+  const b = el("button", { type: "button", class: "xlink", title: `Check ${title(drug)}` }, title(drug));
+  b.addEventListener("click", () => openDrug(drug));
+  return b;
+}
+
+function plantLink(name, fei) {
+  if (!fei) return document.createTextNode(name);
+  const b = el("button", { type: "button", class: "xlink", title: "See every drug this plant makes" }, name);
+  b.addEventListener("click", () => openPlant(fei, name));
+  return b;
+}
+
+function joinNodes(td, nodes, empty) {
+  if (!nodes.length) { td.append(empty); return td; }
+  nodes.forEach((n, i) => { if (i) td.append(", "); td.append(n); });
+  return td;
+}
+
 /* Views: real anchors, one visible at a time, back button works. */
 function showView() {
   const view = (location.hash || "#check").slice(1);
@@ -181,10 +220,11 @@ function renderEvidence(trap) {
   const tbody = $("#evidence tbody");
   tbody.innerHTML = "";
   trap.plants.forEach((p) => {
-    const also = trap.rows.filter((r) => r.shared_plants.some((s) => s.fei === p.fei)).map((r) => title(r.substitute));
+    const also = trap.rows.filter((r) => r.shared_plants.some((s) => s.fei === p.fei)).map((r) => drugLink(r.substitute));
     const tr = el("tr");
-    tr.append(el("td", {}, p.plant), el("td", { class: "num" }, p.fei || "not registered"), el("td", {}, p.country),
-      el("td", { class: "num" }, String(p.products)), el("td", {}, also.join(", ") || "none in this class"));
+    tr.append(el("td"), el("td", { class: "num" }, p.fei || "not registered"), el("td", {}, p.country),
+      el("td", { class: "num" }, String(p.products)), joinNodes(el("td"), also, "none in this class"));
+    tr.firstChild.append(plantLink(p.plant, p.fei));
     const alert = el("td", p.import_alert_dates.length ? { class: "alert" } : {}, p.import_alert_dates.length ? `Listed ${p.import_alert_dates.join(", ")}` : "not listed");
     tr.append(alert);
     tbody.append(tr);
@@ -240,10 +280,18 @@ function renderChain(drug, trap, ragPick) {
     path.style.setProperty("--len", len);
     path.style.animationDelay = `${delay}ms`;
   };
-  const node = (key, label, sub, cls, delay) => {
+  const node = (key, label, sub, cls, delay, open, hint) => {
     const p = pos.get(key);
     const g = document.createElementNS(NS, "g");
-    g.setAttribute("class", `node appear ${cls}`);
+    g.setAttribute("class", `node appear ${cls}${open ? " go" : ""}`);
+    if (open) {
+      Object.entries({ role: "link", tabindex: "0", "aria-label": `${label}: ${hint}` }).forEach(([k, v]) => g.setAttribute(k, v));
+      g.addEventListener("click", open);
+      g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+      const tip = document.createElementNS(NS, "title");
+      tip.textContent = hint;
+      g.append(tip);
+    }
     g.style.animationDelay = `${delay}ms`;
     const r = document.createElementNS(NS, "rect");
     Object.entries({ x: p.x, y: p.y, width: nodeW, height: nodeH }).forEach(([k, v]) => r.setAttribute(k, v));
@@ -267,12 +315,13 @@ function renderChain(drug, trap, ragPick) {
   plants.forEach((p) => {
     const flagged = p.import_alert_dates.length;
     node(`p:${p.fei}`, p.plant, flagged ? `Import alert ${p.import_alert_dates[0]}` : `FEI ${p.fei || "n/a"}, ${p.country}`,
-      flagged ? "flagged" : (hotFei.has(p.fei) ? "shared" : ""), 260);
+      flagged ? "flagged" : (hotFei.has(p.fei) ? "shared" : ""), 260,
+      p.fei ? () => openPlant(p.fei, p.plant) : null, "See every drug this plant makes");
   });
   subs.forEach((s) => {
     const shared = trap.rows.find((r) => r.substitute === s).shared_plants.length;
     node(`s:${s}`, title(s), shared ? `shares ${shared} plant${shared > 1 ? "s" : ""}` : "no shared plant",
-      s === ragPick && shared ? "shared" : "", 520);
+      s === ragPick && shared ? "shared" : "", 520, () => openDrug(s), `Check ${title(s)} the same way`);
   });
   if (hidden && !narrow) {
     const last = pos.get(`p:${plants[plants.length - 1].fei}`);
@@ -290,9 +339,12 @@ function renderChain(drug, trap, ragPick) {
 
 /* ---------- If a plant stops ---------- */
 
-let plantsLoaded = false;
-async function loadPlants() {
-  if (plantsLoaded) return;
+let plantsLoading = null;
+function loadPlants() {
+  plantsLoading ||= fetchPlants();
+  return plantsLoading;
+}
+async function fetchPlants() {
   const sel = $("#plant");
   try {
     const { flagged, exposed } = await api("/api/plants");
@@ -306,8 +358,10 @@ async function loadPlants() {
     };
     group("Under FDA import alert 66-40", flagged);
     group("Most exposure to today's shortage drugs", exposed);
-    plantsLoaded = true;
+    const wanted = new URLSearchParams(location.search).get("plant");
+    if (wanted && location.hash === "#plant") setTimeout(() => openPlant(wanted));
   } catch (e) {
+    plantsLoading = null;
     setState($("#plant-state"), `Could not load plants: ${e.message}`, true);
   }
 }
@@ -325,15 +379,17 @@ $("#plant-form").addEventListener("submit", async (ev) => {
     tbody.innerHTML = "";
     res.rows.forEach((r) => {
       const tr = el("tr", r.short_now ? { class: "short" } : {});
-      tr.append(el("td", {}, title(r.ingredient)), el("td", { class: "num" }, `${r.share_pct}%`),
+      tr.append(el("td"), el("td", { class: "num" }, `${r.share_pct}%`),
         el("td", { class: "num" }, String(r.from_plant)), el("td", { class: "num" }, String(r.all_products)),
         el("td", r.short_now ? { class: "alert" } : {}, r.short_now ? `Yes, ${r.short_now} entr${r.short_now > 1 ? "ies" : "y"}` : "No"));
+      tr.firstChild.append(drugLink(r.ingredient));
       tbody.append(tr);
     });
     $("#plant-cypher").textContent = res.cypher;
     setState(state, `${res.rows[0].plant}: ${res.rows.length} drug${res.rows.length > 1 ? "s" : ""} depend on it.`);
     $("#plant-result").hidden = false;
     renderPlantAlerts(fei);
+    history.replaceState(null, "", `?plant=${encodeURIComponent(fei)}#plant`);
   } catch (e) {
     setState(state, `Could not trace this plant: ${e.message}`, true);
   }
@@ -353,10 +409,10 @@ async function loadRisk() {
       const tr = el("tr");
       const deps = r.top.filter((d) => d.share >= 1).sort((a, b) => b.share - a.share).slice(0, 6);
       const drugs = deps.map((d) => `${title(d.ingredient)} ${d.share}%`).join(", ");
-      tr.append(el("td", { class: "num" }, r.exposure.toFixed(2)), el("td", {}, `${r.plant} `),
+      tr.append(el("td", { class: "num" }, r.exposure.toFixed(2)), el("td"),
         el("td", {}, r.country), el("td", {}, drugs + (r.ingredients > deps.length ? `, and ${r.ingredients - deps.length} more` : "")),
         el("td", r.import_alert_dates.length ? { class: "alert" } : {}, r.import_alert_dates.length ? `Listed ${r.import_alert_dates.join(", ")}` : "not listed"));
-      tr.children[1].append(el("span", { class: "code" }, `FEI ${r.fei}`));
+      tr.children[1].append(plantLink(r.plant, r.fei), " ", el("span", { class: "code" }, `FEI ${r.fei}`));
       tbody.append(tr);
     });
     $("#risk-cypher").textContent = res.cypher;

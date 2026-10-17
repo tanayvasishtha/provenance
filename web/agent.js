@@ -2,7 +2,7 @@
 
 const MODE_TEXT = {
   live: "The model chose the graph queries below and wrote the answer from their rows.",
-  "graph-only": "Computed just now: a rule-based planner chose the graph queries below and wrote the answer from their rows. With an Anthropic key, Claude Opus 5.5 does the choosing.",
+  "graph-only": "Computed just now: a rule-based planner chose the graph queries below and wrote the answer from their rows. With a model key set, the model does the choosing.",
 };
 
 async function loadHospitals() {
@@ -49,43 +49,72 @@ $("#forget").addEventListener("click", async () => {
   renderMemory(slug);
 });
 
+function traceItem(t) {
+  const li = el("li");
+  li.append(el("span", { class: "tool" }, t.tool), " ", el("span", { class: "args" }, JSON.stringify(t.input)),
+    ` returned ${t.rows} row${t.rows === 1 ? "" : "s"}`);
+  const d = el("details");
+  d.append(el("summary", {}, "Cypher"), el("pre", {}, t.cypher));
+  li.append(d);
+  return li;
+}
+
+/* Reads the server-sent events from /api/ask/stream: graph queries land as they return, the answer as it is written. */
+async function* askEvents(question, hospital) {
+  const res = await fetch("/api/ask/stream", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question, hospital }),
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || res.statusText);
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let cut;
+    while ((cut = buf.indexOf("\n\n")) >= 0) {
+      const line = buf.slice(0, cut).trim();
+      buf = buf.slice(cut + 2);
+      if (line.startsWith("data: ")) yield JSON.parse(line.slice(6));
+    }
+  }
+}
+
 $("#ask-form").addEventListener("submit", async (ev) => {
   ev.preventDefault();
   const question = $("#question").value.trim(), hospital = $("#hospital").value;
   if (question.length < 3) return;
   const btn = $("#ask-form button[type=submit]"), state = $("#ask-state");
+  const answer = $("#ask-answer"), ol = $("#ask-trace"), mode = $("#ask-mode");
   btn.disabled = true;
-  $("#ask-result").hidden = true;
-  setState(state, "The agent is querying the graph...");
+  answer.textContent = ""; ol.innerHTML = ""; mode.innerHTML = "";
+  answer.classList.add("typing");
+  $("#ask-result").hidden = false;
+  setState(state, "Reading the question...");
+  const t0 = performance.now();
   try {
-    const res = await fetch("/api/ask", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question, hospital }),
-    });
-    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || res.statusText);
-    const r = await res.json();
-    $("#ask-mode").innerHTML = "";
-    const who = r.mode === "live" ? `live, ${r.model}` : r.mode;
-    $("#ask-mode").append(el("span", { class: "code" }, `${who}, ${(r.elapsed_ms / 1000).toFixed(2)} s`), ` ${MODE_TEXT[r.mode] || ""}`);
-    $("#ask-answer").textContent = r.answer;
-    if (r.note) $("#ask-mode").append(el("span", {}, ` ${r.note}`));
-    const ol = $("#ask-trace");
-    ol.innerHTML = "";
-    if (!r.trace.length) ol.append(el("li", {}, "No graph query was needed for this answer."));
-    r.trace.forEach((t) => {
-      const li = el("li");
-      li.append(el("span", { class: "tool" }, t.tool), " ", el("span", { class: "args" }, JSON.stringify(t.input)),
-        ` returned ${t.rows} row${t.rows === 1 ? "" : "s"}`);
-      const d = el("details");
-      d.append(el("summary", {}, "Cypher"), el("pre", {}, t.cypher));
-      li.append(d);
-      ol.append(li);
-    });
+    for await (const e of askEvents(question, hospital)) {
+      if (e.type === "step") setState(state, `${e.text}...`);
+      else if (e.type === "reset") { answer.textContent = ""; ol.innerHTML = ""; }
+      else if (e.type === "tool") {
+        ol.append(traceItem(e));
+        setState(state, `${e.tool} returned ${e.rows} row${e.rows === 1 ? "" : "s"}`);
+      } else if (e.type === "delta") {
+        if (!answer.textContent) setState(state, `Writing the answer (${((performance.now() - t0) / 1000).toFixed(1)} s)`);
+        answer.textContent += e.text;
+      } else if (e.type === "done") {
+        const who = e.mode === "live" ? `live, ${e.model}` : e.mode;
+        mode.append(el("span", { class: "code" }, `${who}, ${(e.elapsed_ms / 1000).toFixed(2)} s`), ` ${MODE_TEXT[e.mode] || ""}`);
+        if (e.note) mode.append(el("span", {}, ` ${e.note}`));
+      }
+    }
+    if (!ol.children.length) ol.append(el("li", {}, "No graph query was needed for this answer."));
     setState(state, "");
-    $("#ask-result").hidden = false;
     renderMemory(hospital);
   } catch (e) {
     setState(state, `The agent could not answer: ${e.message}`, true);
   } finally {
+    answer.classList.remove("typing");
     btn.disabled = false;
   }
 });
@@ -122,10 +151,10 @@ async function loadBridges() {
     tbody.innerHTML = "";
     res.rows.forEach((r) => {
       const tr = el("tr");
-      const plant = el("td", {}, `${r.plant} `);
-      plant.append(el("span", { class: "code" }, `FEI ${r.fei}`));
+      const plant = el("td");
+      plant.append(plantLink(r.plant, r.fei), " ", el("span", { class: "code" }, `FEI ${r.fei}`));
       tr.append(el("td", { class: "num" }, String(r.betweenness)), plant, el("td", {}, r.country),
-        el("td", { class: "num" }, `${r.drugs_made} / ${r.classes}`), el("td", {}, r.sample.map(title).join(", ")));
+        el("td", { class: "num" }, `${r.drugs_made} / ${r.classes}`), joinNodes(el("td"), r.sample.map(drugLink), ""));
       tbody.append(tr);
     });
     $("#bridge-cypher").textContent = res.cypher;

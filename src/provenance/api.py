@@ -8,7 +8,7 @@ from pathlib import Path
 
 import redis
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -149,6 +149,19 @@ def ask(body: Ask) -> dict:
     if body.hospital and body.hospital not in memory.DEMO_HOSPITALS:
         raise HTTPException(404, f"Unknown hospital {body.hospital}")
     return agent.ask(body.question, body.hospital)
+
+
+@app.post("/api/ask/stream")
+def ask_stream(body: Ask) -> StreamingResponse:
+    """Server-sent events: each graph query as it returns, then the answer as it is written."""
+    if body.hospital and body.hospital not in memory.DEMO_HOSPITALS:
+        raise HTTPException(404, f"Unknown hospital {body.hospital}")
+
+    def events():
+        for ev in agent.ask_stream(body.question, body.hospital):
+            yield f"data: {json.dumps(ev, default=str)}\n\n"
+
+    return StreamingResponse(events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.get("/api/hospitals")

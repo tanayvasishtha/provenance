@@ -54,6 +54,7 @@ def test_decisions_stay_inside_their_hospital_graph():
 
 def test_graph_only_agent_names_the_first_drug_and_cites_intas(monkeypatch):
     monkeypatch.setattr(agent.settings, "anthropic_api_key", "")
+    monkeypatch.setattr(agent.settings, "openai_api_key", "")
     r = agent.ask("Cisplatin is short. Is carboplatin a safe switch?")
     assert r["mode"] in {"graph-only", "replay"}
     assert "3004011473" in r["answer"]
@@ -68,6 +69,7 @@ def test_betweenness_top_three_holds_on_both_engines():
 
 def test_a_question_never_writes_to_memory(monkeypatch):
     monkeypatch.setattr(agent.settings, "anthropic_api_key", "")
+    monkeypatch.setattr(agent.settings, "openai_api_key", "")
     memory.forget("oncology-centre")
     agent.ask("Cisplatin is short. Is carboplatin a safe switch?", "oncology-centre")
     assert memory.profile("oncology-centre")["decisions"] == []

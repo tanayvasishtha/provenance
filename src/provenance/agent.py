@@ -397,3 +397,80 @@ def graph_only(question: str, hospital: str | None) -> dict:
             last = past[0]
             parts.append(f"Last time, {mem['name']} switched {drug.title()} to {last['substitute'].title()} ({last['at'][:10]}).")
     return {"mode": "graph-only", "answer": " ".join(parts), "trace": trace}
+
+
+def ask_stream(question: str, hospital: str | None = None):
+    """Yield the agent's work as it happens: each graph query when it returns, then the answer token by token.
+    Same tools, rules and fallbacks as ask(); only the delivery differs."""
+    start = time.perf_counter()
+
+    def done(**extra):
+        return {"type": "done", "elapsed_ms": round((time.perf_counter() - start) * 1000), **extra}
+
+    def replay(out: dict, reset: bool = False):
+        if reset:  # the model may have written half an answer before failing; the page clears it
+            yield {"type": "reset"}
+        for t in out["trace"]:
+            yield {"type": "tool", **t}
+        yield {"type": "delta", "text": out["answer"]}
+        yield done(mode=out["mode"], model=out.get("model"), note=out.get("note"))
+
+    content = question if not hospital else f"[Hospital: {hospital}] {question}"
+    if not settings.openai_api_key:
+        yield from replay(ask(question, hospital))
+        return
+    trace: list[dict] = []
+    try:
+        yield from _stream_openai(content, trace)
+        yield done(mode="live", model=settings.openai_model)
+    except LookupError:
+        out = graph_only(question, hospital)
+        out["note"] = "Today's model budget is used up, so this answer came from the graph-only planner."
+        yield from replay(out, reset=True)
+    except Exception as e:  # noqa: BLE001  model failure mid-stream: finish from the graph instead of breaking the page
+        if not _is_model_error(e):
+            raise
+        log.warning("model stream failed (%s); answering in graph-only mode", type(e).__name__)
+        out = graph_only(question, hospital)
+        out["note"] = f"The model call failed ({type(e).__name__}), so this answer came from the graph-only planner."
+        yield from replay(out, reset=True)
+
+
+def _stream_openai(content: str, trace: list[dict]):
+    from openai import OpenAI
+
+    client = OpenAI(api_key=settings.openai_api_key)
+    tools = [{"type": "function", "function": {"name": t["name"], "description": t["description"],
+                                               "parameters": t["input_schema"], "strict": True}} for t in MODEL_TOOLS]
+    messages: list = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": content}]
+    for step in range(MAX_STEPS):
+        if not _spend_one():
+            raise LookupError("daily model budget used")
+        yield {"type": "step", "text": "Choosing graph queries" if step == 0 else "Writing the answer from the rows"}
+        stream = client.chat.completions.create(model=settings.openai_model, messages=messages, tools=tools,
+                                                max_completion_tokens=600, stream=True)
+        text, calls = "", {}
+        for chunk in stream:
+            if not chunk.choices:
+                continue
+            delta = chunk.choices[0].delta
+            if delta.content:
+                text += delta.content
+                yield {"type": "delta", "text": delta.content}
+            for tc in delta.tool_calls or []:
+                c = calls.setdefault(tc.index, {"id": "", "name": "", "args": ""})
+                c["id"] = tc.id or c["id"]
+                if tc.function:
+                    c["name"] += tc.function.name or ""
+                    c["args"] += tc.function.arguments or ""
+        if not calls:
+            return
+        ordered = [calls[i] for i in sorted(calls)]
+        messages.append({"role": "assistant", "content": text or None, "tool_calls": [
+            {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": c["args"]}} for c in ordered]})
+        before = len(trace)
+        results = _run_calls([(c["id"], c["name"], json.loads(c["args"] or "{}")) for c in ordered], trace)
+        for t in trace[before:]:
+            yield {"type": "tool", **t}
+        messages += [{"role": "tool", "tool_call_id": cid, "content": t[:MAX_TOOL_TEXT]} for cid, t in results.items()]
+    yield {"type": "delta", "text": "Stopped after too many steps without an answer."}

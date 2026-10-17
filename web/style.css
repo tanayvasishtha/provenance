@@ -163,6 +163,11 @@ button:disabled { opacity: 0.6; cursor: progress; }
 #chain .node.flagged rect { fill: var(--red); }
 #chain .node.flagged text, #chain .node.flagged .sub { fill: #fff; }
 #chain .node.shared rect { stroke: var(--red-on-tray); stroke-width: 3px; }
+#chain .node.go { cursor: pointer; }
+#chain .node.go rect { transition: transform .15s ease, filter .15s ease; transform-box: fill-box; transform-origin: center; }
+#chain .node.go:hover rect, #chain .node.go:focus-visible rect { transform: scale(1.025); filter: drop-shadow(0 3px 8px rgba(0,0,0,.35)); }
+#chain .node.go:focus-visible { outline: none; }
+#chain .node.go:focus-visible rect { stroke: var(--amber); stroke-width: 3px; }
 #chain .edge { fill: none; stroke: var(--tray-line); stroke-width: 1.4; opacity: 0.7; }
 #chain .edge.hot { stroke: var(--red-on-tray); stroke-width: 3; opacity: 1; }
 #chain .draw { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: draw 0.4s ease-out forwards; }
@@ -171,6 +176,7 @@ button:disabled { opacity: 0.6; cursor: progress; }
 @keyframes appear { to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { #chain .draw, #chain .appear { animation: none; stroke-dashoffset: 0; opacity: 1; } }
 .chain-desc { margin: var(--s3) 0 0; font-size: 0.95em; color: var(--on-tray); }
+.tray-hint { margin: var(--s1, 4px) 0 0; font-size: 0.82em; color: #A9CAC6; }
 
 /* Records */
 .section-title { margin: var(--s6) 0 var(--s2); font-family: var(--display); font-stretch: 108%; font-weight: 800; font-size: clamp(22px, 1.1rem + 0.8vw, 30px); line-height: 1.15; letter-spacing: -0.01em; }
@@ -205,6 +211,10 @@ tr.short td:first-child { font-weight: 700; }
 .mode { font-size: 0.86em; color: var(--steel); margin: var(--s4) 0 var(--s2); }
 .mode .code { font-weight: 700; color: var(--teal); background: var(--teal-50); }
 .answer { padding: var(--s4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--lift); white-space: pre-wrap; font-size: 1.03em; }
+.answer.typing::after { content: ""; display: inline-block; width: .5em; height: 1.05em; margin-left: 2px; vertical-align: text-bottom; background: var(--teal); animation: caret 1s steps(2) infinite; }
+.answer:empty:not(.typing) { display: none; }
+@keyframes caret { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .answer.typing::after { animation: none; } }
 .trace { padding-left: var(--s4); }
 .trace li { margin: var(--s2) 0; }
 .trace .tool { font-family: var(--display); font-weight: 750; color: var(--teal); }
@@ -253,3 +263,8 @@ tr.short td:first-child { font-weight: 700; }
   html { scroll-padding-top: 0; }
   .appbar { position: static; }
 }
+
+/* Plant and drug names that open their own view. */
+.xlink { all: unset; cursor: pointer; color: inherit; font: inherit; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; text-decoration-thickness: 1px; border-radius: 3px; }
+.xlink:hover { color: var(--teal); text-decoration-color: currentColor; }
+.xlink:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
