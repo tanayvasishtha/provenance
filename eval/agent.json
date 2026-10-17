@@ -1,0 +1,268 @@
+{
+  "summary": {
+    "asked": 18,
+    "answered_live": 18,
+    "model": "gpt-4.1-mini",
+    "no_invented_fei_or_date": 18,
+    "every_flagged_plant_named_with_date": 17,
+    "names_a_no_shared_plant_option": 18,
+    "median_seconds": 2.253
+  },
+  "rows": [
+    {
+      "drug": "BUPIVACAINE HYDROCHLORIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 9208,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "No substitute was proposed. None of the plants making Bupivacaine Hydrochloride are under FDA Import Alert 66-40. There are same-class drugs that share plants with it: Lidocaine Hydrochloride, Lidocaine Hydrochloride Anhydrous, and Ropivacaine Hydrochloride. Same-class options without shared plants include Lidocaine and Prilocaine Hydrochloride. Note that same class does not mean they are interchangeable for a patient; the pharmacist decides."
+    },
+    {
+      "drug": "CARBOPLATIN",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2135,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "There is no named substitute for Carboplatin. \n\nOne plant making Carboplatin, Intas Pharmaceuticals Limited (FEI 3004011473), has an import alert dated 06/01/2023. Other plants making Carboplatin have no import alert currently.\n\nSame-class drugs Cisplatin and Oxaliplatin come from some of the same plants making Carboplatin. There are no same-class options from different plants.\n\nBeing in the same class does not necessarily mean they are interchangeable; the pharmacist decides."
+    },
+    {
+      "drug": "CLONAZEPAM",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2078,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [
+        "3003157498",
+        "3004011473"
+      ],
+      "names_safe_option": true,
+      "answer": "No substitute was proposed. The flagged plants making clonazepam are two Intas Pharmaceuticals plants (FEI 3003157498 and FEI 3004011473), both on FDA Import Alert in 2023. Other plants making clonazepam are not under Import Alert. Same-class drugs that share plants with clonazepam are temazepam, clobazam, diazepam, and lorazepam. Alprazolam, chlordiazepoxide hydrochloride, and midazolam hydrochloride are same-class options made in plants not flagged or in shortage. Same-class does not mean interchangeable for a patient; you decide."
+    },
+    {
+      "drug": "DEXMEDETOMIDINE HYDROCHLORIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2269,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "There is no substitute proposed for Dexmedetomidine Hydrochloride. The plants making this drug are mostly not under FDA Import Alert 66-40, except Intas Pharmaceuticals Limited with FEI 3003157498 (alert since 11/14/2023) and 3004011473 (alert since 06/01/2023). No same-class drugs share plants making this drug. Same-class options with no shared plants include Tizanidine Hydrochloride, Clonidine Hydrochloride, Guanfacine Hydrochloride, Clonidine, Guanfacine, and Methyldopa. Same class does not mean interchangeable for a patient; you decide."
+    },
+    {
+      "drug": "DEXTROSE MONOHYDRATE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 1736,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "There is no proposed substitute for Dextrose Monohydrate. None of the plants making Dextrose Monohydrate are under FDA Import Alert 66-40. No same-class drugs share plants with it, and there are no same-class options with no shared plants. Same class does not mean interchangeable for a patient; you decide."
+    },
+    {
+      "drug": "DOPAMINE HYDROCHLORIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2253,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "There is no substitute proposed for Dopamine Hydrochloride. None of the plants making Dopamine Hydrochloride are under FDA Import Alert 66-40. There are no same-class drugs sharing manufacturing plants with Dopamine Hydrochloride. In the same class, options without shared plants include Epinephrine, Norepinephrine Bitartrate, and Epinephrine Bitartrate. Note that same class does not mean interchangeable for a patient; the pharmacist decides."
+    },
+    {
+      "drug": "FUROSEMIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2307,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "Furosemide is made by two plants under import alert (FEI 3003157498, alert 11/14/2023 and FEI 3004011473, alert 06/01/2023). Other plants making furosemide are not under import alert. Bumetanide and torsemide share some manufacturing plants with furosemide. Ethacrynic acid and ethacrynate sodium are same-class alternatives with no shared plants and no current shortage. Same class does not mean interchangeable for a patient; you decide. There is no specific substitute proposed for furosemide now."
+    },
+    {
+      "drug": "HYDROMORPHONE HYDROCHLORIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2179,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "Hydromorphone Hydrochloride has no proposed substitute now. None of its manufacturing plants are under FDA Import Alert 66-40. Other same-class drugs sharing these plants include Morphine Sulfate, Oxycodone Hydrochloride, and Hydrocodone Bitartrate. There is a same-class option, Tramadol Hydrochloride, from a different set of plants with one flagged plant, but it is not short now. Same class does not mean interchangeable for the patient; you decide."
+    },
+    {
+      "drug": "KETOROLAC TROMETHAMINE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2200,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "Ketorolac Tromethamine has no proposed substitute now. One plant making it, Sun Pharmaceutical Industries Limited (FEI 3002809586), is on FDA Import Alert since 12/07/2022; other plants making it are not flagged. Indomethacin, Etodolac, Meloxicam, and Naproxen share some plants with Ketorolac Tromethamine. Ibuprofen, Diclofenac Sodium, Celecoxib, Naproxen Sodium, and Ibuprofen Lysine are same-class options made at plants not shared with Ketorolac Tromethamine and not flagged. Same class does not mean interchangeable for a patient; you decide."
+    },
+    {
+      "drug": "LIDOCAINE HYDROCHLORIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2344,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "There is no proposed substitute named for Lidocaine Hydrochloride. None of the plants making Lidocaine Hydrochloride is under FDA Import Alert 66-40. Same-class drugs sharing plants with Lidocaine Hydrochloride include Bupivacaine Hydrochloride, Amiodarone Hydrochloride, Ropivacaine Hydrochloride, Flecainide Acetate, Propafenone Hydrochloride, and Sotalol Hydrochloride. Same-class options with no shared plants are Mexiletine Hydrochloride and Prilocaine Hydrochloride. Note that same class does not mean interchangeable for a patient; the pharmacist decides."
+    },
+    {
+      "drug": "LIDOCAINE HYDROCHLORIDE ANHYDROUS",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2423,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "No substitute was proposed. None of the plants making Lidocaine Hydrochloride Anhydrous are under FDA Import Alert 66-40. Same-class drugs made in the same plants are Bupivacaine Hydrochloride, Ropivacaine Hydrochloride, and Amiodarone Hydrochloride. Same-class options with no shared plant include Sotalol Hydrochloride, Flecainide Acetate, Propafenone Hydrochloride, Mexiletine Hydrochloride, and Prilocaine Hydrochloride. Same class does not mean interchangeable for a patient; you decide."
+    },
+    {
+      "drug": "LISDEXAMFETAMINE DIMESYLATE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2346,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "No substitute was proposed for Lisdexamfetamine Dimesylate. None of the plants making Lisdexamfetamine Dimesylate are under FDA Import Alert 66-40. Same-class drugs that share plants with Lisdexamfetamine Dimesylate include Methylphenidate Hydrochloride, Amphetamine Sulfate, Dexmethylphenidate Hydrochloride, and Dextroamphetamine Sulfate. There are same-class options with no shared plants: Caffeine and Caffeine Citrate (one of their plants is flagged but not on shortage). Same class does not mean interchangeable for a patient; the pharmacist decides."
+    },
+    {
+      "drug": "LORAZEPAM",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2046,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "No substitute was proposed for Lorazepam. None of the plants making Lorazepam is under FDA Import Alert 66-40. Other same-class drugs sharing plants making Lorazepam include Diazepam, Midazolam Hydrochloride, Alprazolam, Clobazam, and Clonazepam. Same-class options with no shared plants include Temazepam and Chlordiazepoxide Hydrochloride. Same class does not mean interchangeable for a patient; the pharmacist decides."
+    },
+    {
+      "drug": "METHYLPHENIDATE HYDROCHLORIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2180,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "There is no substitute proposed for Methylphenidate Hydrochloride. None of the plants making Methylphenidate Hydrochloride are under FDA Import Alert 66-40. Same-class drugs Dexmethylphenidate Hydrochloride, Lisdexamfetamine Dimesylate, Dextroamphetamine Sulfate, and Amphetamine Sulfate come from plants that also make Methylphenidate Hydrochloride, so they share exposure risk. Same-class options with no shared plant include Caffeine and Caffeine Citrate (with one flagged plant). Same class does not mean interchangeable for a patient; the pharmacist decides."
+    },
+    {
+      "drug": "MIDAZOLAM HYDROCHLORIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2489,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "No substitute was specifically proposed for Midazolam Hydrochloride. The plants making it include GLAND PHARMA LIMITED (FEI 3002647489), Hikma Pharmaceuticals USA Inc. (FEI 2220525), ONESOURCE SPECIALTY PHARMA LIMITED (FEI 3003813519), Fresenius Kabi USA, LLC (FEI 3008887707), Hospira, Inc. (FEIs 1021343 and 1925262), among others, and none are under FDA Import Alert 66-40. Same-class drugs sharing plants include Diazepam, Lorazepam, and Alprazolam. Same-class options without shared plants include Temazepam, Clobazam, Chlordiazepoxide Hydrochloride, and Clonazepam, although Clonazepam has some flagged plants and current shortages. Same class does not mean interchangeable for a patient; you decide."
+    },
+    {
+      "drug": "MORPHINE SULFATE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2368,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "Morphine Sulfate has no substitute proposed currently. None of its plants are under FDA Import Alert 66-40. Other opioids sharing some plants with Morphine Sulfate are Hydromorphone Hydrochloride, Oxycodone Hydrochloride, and Hydrocodone Bitartrate. Tramadol Hydrochloride is a same-class option with no shared plants and is not in shortage now. Same class does not mean they are interchangeable for a patient; the pharmacist must decide."
+    },
+    {
+      "drug": "ROCURONIUM BROMIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2139,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "A substitute proposed for Rocuronium Bromide is Atacurium Besilate. The substitute does not share any manufacturing plants with Rocuronium Bromide. None of the plants making Rocuronium Bromide is under FDA Import Alert 66-40. There are no same-class drugs that share plants with Rocuronium Bromide, nor are there same-class options without shared plants. Note that being in the same class does not mean the drugs are interchangeable for a patient; the pharmacist decides."
+    },
+    {
+      "drug": "ROPIVACAINE HYDROCHLORIDE",
+      "mode": "live",
+      "model": "gpt-4.1-mini",
+      "elapsed_ms": 2206,
+      "tools": [
+        "check_substitute"
+      ],
+      "invented_feis": [],
+      "invented_dates": [],
+      "flagged_missed": [],
+      "names_safe_option": true,
+      "answer": "There is no substitute proposed specifically for Ropivacaine Hydrochloride. None of the plants making Ropivacaine Hydrochloride are under FDA Import Alert 66-40. Same-class drugs that come out of plants also making Ropivacaine Hydrochloride include Lidocaine Hydrochloride Anhydrous, Bupivacaine Hydrochloride, and Lidocaine Hydrochloride. Same-class options with no shared plant include Lidocaine and Prilocaine Hydrochloride. Keep in mind same class does not mean interchangeable for a patient; you decide."
+    }
+  ]
+}

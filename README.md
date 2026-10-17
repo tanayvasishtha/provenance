@@ -4,6 +4,8 @@ When a drug runs short, a hospital pharmacist picks a substitute. Provenance che
 
 Demo video: _link added after recording_ · Live app: https://provenance-imzk.onrender.com (free hosting; the first visit after a quiet spell takes about a minute to wake) · Tracks: Agents That Act on Connected Data, Agent Memory and Coordination
 
+![Cisplatin checked: the label search suggests carboplatin, the graph shows it comes out of three of the same plants, one under FDA import alert since 06/01/2023](docs/check.png)
+
 ## The problem
 
 In November 2022 FDA inspectors found shredded quality records at an Intas Pharmaceuticals plant in Sanand, Gujarat. That plant made over half of US generic cisplatin and carboplatin, two chemotherapy drugs. Intas stopped US production, cisplatin went short in February 2023, and FDA put the plant on Import Alert 66-40 on 1 June 2023. In a June 2023 survey of 27 US cancer centres by NCCN, 93% were short of carboplatin and 70% of cisplatin.
@@ -36,7 +38,30 @@ The three hospitals are synthetic demo tenants. Every drug, plant and FDA action
 
 Where the similar-text pick shared no plant: dextrose (picked norepinephrine), dopamine (mexiletine), hydromorphone (tramadol), lorazepam (chlordiazepoxide). Where the graph found no plant-independent option: carboplatin, dextrose, rocuronium. Full table with plant names: [eval/results.md](eval/results.md).
 
+### The agent, scored against the graph
+
+`python -m provenance.agent_eval` asks the deployed agent the same plain question for each of the 18 shortage drugs ("<drug> is on the shortage list. What can we switch to, and is anything risky?") and checks every answer against FalkorDB.
+
+| Check | gpt-4.1-mini, live |
+|---|---|
+| Cites no FEI number or import-alert date that the graph does not hold | 18 of 18 |
+| Names every flagged plant that makes the drug, with its FEI and alert date | 17 of 18 |
+| Names a same-class option with no shared plant, when the graph has one | 18 of 18 |
+| Median time per answer | 2.3 s |
+
+The miss is clonazepam: the answer names both Intas sites by FEI but says "in 2023" instead of the two alert dates. The first run of this eval scored 14 of 18 on the second check and found a real error, fixed below. Per-drug answers: [eval/agent.md](eval/agent.md).
+
 "Shares a plant" counts only plants a label names for manufacture or sterilisation. Repackers and relabellers are stored on a separate `HANDLES` edge and kept out of every count; before that split, the shared-plant rate read 94%, which overstated it.
+
+### Screens
+
+| If a plant stops | Where the risk sits |
+|---|---|
+| ![Intas FEI 3004011473: six drugs depend on it, and the same plant read through three hospitals' memory graphs](docs/plant.png) | ![Plants ranked by exposure to today's shortage drugs and by exact betweenness centrality](docs/risk.png) |
+
+![The live agent on the oncology centre's memory graph: it calls check_substitute and hospital_memory, then answers with the Intas plant and its alert date](docs/ask.png)
+
+Plant and drug names are links: click a plant in the chain to see everything it makes, or a substitute to check it the same way.
 
 ## How it works
 
@@ -44,7 +69,7 @@ Where the similar-text pick shared no plant: dextrose (picked norepinephrine), d
 2. For those substances it reads 6,251 single-ingredient products from openFDA NDC, then the 3,828 DailyMed labels behind them. Each label lists the plants that make, test, pack or relabel the product, with a DUNS number and the product codes each plant handles. All 3,828 labels were read; none were skipped.
 3. The FDA establishment registry (10,438 plants) maps each DUNS to an FDA FEI number and a country. Import Alert 66-40 (471 firms) is matched to registry plants by firm name, country and address words; a firm with several sites (Intas has seven) is matched to the one address it names.
 4. `provenance load` writes it all into FalkorDB and embeds each drug's "Indications and usage" label text into a FalkorDB vector index for the baseline.
-5. The web app and the agent run the queries below, live, on every request; nothing is recorded or replayed. With an OpenAI key (`PV_OPENAI_API_KEY`) gpt-4.1-mini chooses the tools; an Anthropic key works too; with neither, the planner is rule-based. The page says which mode answered and how long it took. Reusing one pooled connection to FalkorDB Cloud brought a typical answer from 2.1 s to under 0.1 s.
+5. The web app and the agent run the queries below, live, on every request; nothing is recorded or replayed. With an OpenAI key (`PV_OPENAI_API_KEY`) gpt-4.1-mini chooses the tools; an Anthropic key works too; with neither, the planner is rule-based. The page says which mode answered and how long it took. Answers stream: each graph query shows on the page as it returns and the answer appears as it is written, so the first rows land in under half a second. Reusing one pooled connection to FalkorDB Cloud brought a typical answer from 2.1 s to under 0.1 s.
 
 ## Graph model
 
@@ -132,6 +157,7 @@ All queries live in [src/provenance/queries.py](src/provenance/queries.py); the 
 - The smallest model made up facts: with all nine tools, gpt-4.1-nano mixed rows from different drugs and claimed import alerts on midazolam's substitutes that the graph does not show. The agent now sees only tools that answer a whole question (one `check_substitute` call returns everything about a switch), and runs on gpt-4.1-mini, about $0.002 an answer with a cap of 200 model calls a day.
 - FalkorDB 4.22 ignored a hop: on the cloud instance (4.22), `OPTIONAL MATCH (q)<-[:MAKES]-(bad:Facility)-[:FLAGGED]->(:Action)` bound every plant that makes the product, flagged or not, so the safe list showed up to 18 "plants under import alert" where the graph has 3 flagged plants in total. FalkorDB 6.0.1 returns the right count. Moving the second hop into `WHERE (bad)-[:FLAGGED]->(:Action)` gives the same correct answer on both, and a test pins it.
 - Plain drug names came back empty: the model asked about "Midazolam" while the graph stores MIDAZOLAM HYDROCHLORIDE, got no rows, and said no substitutes existed. Tool arguments now resolve to the graph's substance names first.
+- The model skimmed past a flagged plant: the first live agent eval caught gpt-4.1-mini telling a pharmacist that no plant behind furosemide was under import alert. Both Intas sites make it. The plant sat in the middle of a 27-row list. `check_substitute` now returns the flagged plants as their own field, the prompt requires each one with its date, and the eval below pins it.
 - Combination products pulled in unrelated classes: dextrose combinations dragged heparin into scope. Scope now uses single-ingredient products only.
 
 ## Known gaps

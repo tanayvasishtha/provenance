@@ -289,7 +289,9 @@ def _is_model_error(e: Exception) -> bool:
 def _count(out) -> int:
     if isinstance(out, list):
         return len(out)
-    return len(out.get("alerts", out.get("decisions", []))) if isinstance(out, dict) else 1
+    if isinstance(out, dict):  # a combined result: count the graph rows inside it, not the keys
+        return sum(len(v) for v in out.values() if isinstance(v, list))
+    return 1
 
 
 _DRUG_NAMES: list[str] = []
